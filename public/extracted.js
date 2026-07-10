@@ -548,7 +548,10 @@ function saveJournal() {
   const input = document.getElementById("journalInput");
   const isBackdate = document.getElementById("journalBackdate") && document.getElementById("journalBackdate").checked;
   const text = input.value.trim();
-  if(!text) return;
+  if(!text) {
+    alert("Please write something before saving.");
+    return;
+  }
   
   let entryDate = new Date();
   if (isBackdate) {
