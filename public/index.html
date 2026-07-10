@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Command Center</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️‍🔥</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+
+<style>
+  :root {
+    --bg: #110e0e; /* Noir Black variant for depth */
+    --surface: rgba(27,23,23,0.85); /* #1B1717 Noir Black */
+    --surface2: rgba(27,23,23,0.95);
+    --border: rgba(237,235,221,0.08); /* Cotton */
+    --border2: rgba(237,235,221,0.18);
+    --border3: rgba(237,235,221,0.25);
+    --rose: #ff2a2a; /* Tactical Blood Red */
+    --pink: #d90429; /* Deep Red Accent */
+    --maroon: #810100; /* Cherry Red */
+    --deep: #630000; /* Maroon */
+    --cream: #f4f2e6; /* Bright Cotton */
+    --text: #EDEBDD; /* Cotton */
+    --muted: rgba(237,235,221,0.5); 
+    --muted2: rgba(237,235,221,0.35);
+    --accent-code: #88ddcc; 
+    --accent-warn: #ffcc88;
+    --sans: 'DM Sans', sans-serif; --serif: 'Instrument Serif', serif;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; position: relative; }
+  
+  /* NOISE & ORBS */
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E"); opacity: 0.03; pointer-events: none; z-index: 9999; mix-blend-mode: overlay; }
+  .orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(90px); }
+  .orb1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,34,70,0.32), transparent 70%); top: -140px; right: -100px; animation: orbDrift1 14s ease-in-out infinite; }
+  .orb2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(232,105,138,0.18), transparent 70%); bottom: 5%; left: -80px; animation: orbDrift2 18s ease-in-out infinite; }
+  @keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-40px,50px) scale(1.12)} }
+  @keyframes orbDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(50px,-40px) scale(1.18)} }
+
+  /* RIPPLE EFFECT */
+  .tap-ripple { position: fixed; border-radius: 50%; pointer-events: none; z-index: 999; background: radial-gradient(circle, rgba(232,105,138,0.35), transparent 70%); transform: scale(0); animation: rippleExpand 0.7s ease-out forwards; }
+  @keyframes rippleExpand { 0%{transform:scale(0);opacity:1} 100%{transform:scale(1);opacity:0} }
+
+  /* FOCUS OVERLAY */
+  #focusOverlay { position: fixed; inset: 0; z-index: 1000; background: radial-gradient(ellipse 60% 55% at 50% 42%, rgba(139,34,70,0.3) 0%, transparent 65%), rgba(12,8,9,0.97); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; overflow: hidden; }
+  #focusOverlay.active { opacity: 1; pointer-events: all; }
+  .focus-inner { text-align: center; padding: 2rem 1.5rem; width: 94%; max-width: 520px; position: relative; z-index: 2; transform: translateY(50px) scale(0.93); transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+  #focusOverlay.active .focus-inner { transform: translateY(0) scale(1); }
+  .focus-time-badge { display: inline-block; font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--muted2); background: rgba(36,25,32,0.85); padding: 7px 20px; border-radius: 30px; border: 1px solid var(--border2); margin-bottom: 1rem; }
+  .focus-title { font-family: var(--serif); font-size: clamp(2rem, 6vw, 3.5rem); color: var(--cream); line-height: 1.1; margin-bottom: 0.6rem; text-shadow: 0 0 40px rgba(244,160,181,0.2); }
+  .focus-sub { color: var(--muted2); font-size: 13px; line-height: 1.7; margin-bottom: 1.5rem; }
+  .focus-close { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; font-family: var(--sans); margin-top: 1rem; transition: color 0.2s; }
+  .focus-close:hover { color: var(--rose); }
+
+  /* OVERLAY ANIMATIONS (Heart, Book, Cycle, Gym) */
+  .gf-heart-wrap { width: 150px; height: 150px; margin: 0 auto 1rem; position: relative; display: flex; align-items: center; justify-content: center; }
+  .gf-heart-svg { width: 118px; height: 108px; filter: drop-shadow(0 0 24px rgba(232,105,138,0.65)); animation: heartbeat 1.1s ease-in-out infinite; }
+  @keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.16)} 28%{transform:scale(1)} }
+  .heart-ripple { position: absolute; border-radius: 50%; border: 1.5px solid rgba(232,105,138,0.22); animation: rippleOut 2.5s ease-out infinite; }
+  .r1 { width: 118px; height: 118px; animation-delay: 0s; } .r2 { width: 138px; height: 138px; animation-delay: 0.6s; }
+  @keyframes rippleOut { 0%{transform:scale(0.85);opacity:0.6} 100%{transform:scale(1.35);opacity:0} }
+
+  .book-wrap { width: 130px; height: 130px; margin: 0 auto 1rem; position: relative; display: flex; align-items: center; justify-content: center; }
+  .book { width: 90px; height: 116px; position: relative; animation: bookFloat 3.5s ease-in-out infinite; }
+  @keyframes bookFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
+  .book-cover { position: absolute; inset: 0; background: linear-gradient(145deg, #9b2a52, var(--deep), #3a0820); border-radius: 3px 10px 10px 3px; box-shadow: 6px 6px 28px rgba(0,0,0,0.6); z-index: 3; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+  .book-page { position: absolute; top: 4px; left: 14px; border-radius: 0 4px 4px 0; transform-origin: left center; }
+  .p1 { width: 84px; height: 108px; background: #ddc8d0; z-index: 2; animation: pageFan1 3.5s ease-in-out infinite; }
+  .p2 { width: 80px; height: 104px; top: 6px; background: #cbb4bc; z-index: 1; animation: pageFan2 3.5s ease-in-out infinite; }
+  @keyframes pageFan1 { 0%,100%{transform:rotateY(0deg)} 40%,60%{transform:rotateY(25deg)} }
+  @keyframes pageFan2 { 0%,100%{transform:rotateY(0deg)} 40%,60%{transform:rotateY(45deg)} }
+
+  .cycle-scene { width: 290px; height: 100px; margin: 0 auto 1rem; position: relative; overflow: hidden; }
+  .cycle-road { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(136,221,204,0.3), transparent); }
+  .cyclist { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); animation: cyclistBob 0.45s ease-in-out infinite; }
+  @keyframes cyclistBob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-3px)} }
+  
+  .gym-fire { font-size: 3rem; display: block; margin-bottom: 0.5rem; animation: firePop 0.9s ease-in-out infinite; filter: drop-shadow(0 0 15px rgba(255,150,50,0.4)); }
+  @keyframes firePop { 0%,100%{transform:scale(1) rotate(-4deg)} 50%{transform:scale(1.1) rotate(4deg)} }
+
+  /* HEADER & NAV */
+  header { padding: 2rem 2rem 1.5rem; position: relative; z-index: 1; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(20,12,18,0.7) 0%, transparent 100%); }
+  .hdr-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; max-width: 1200px; margin: 0 auto; }
+  .hdr-left h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); color: var(--cream); line-height: 1; margin-bottom: 8px; text-shadow: 0 0 60px rgba(244,160,181,0.15); }
+  .hdr-left h1 em { color: var(--rose); font-style: italic; }
+  .hdr-date { font-size: 11px; color: var(--muted2); letter-spacing: 1px; text-transform: uppercase; }
+  .daily-quote { font-size: 11px; color: var(--muted); font-style: italic; margin-top: 8px; max-width: 300px; line-height: 1.5; }
+  .hdr-right { text-align: right; }
+  .exam-chip { display: inline-block; background: rgba(139,34,70,0.15); border: 1px solid rgba(232,105,138,0.25); border-radius: 30px; padding: 6px 16px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; color: var(--rose); }
+  .countdown { font-family: var(--serif); font-size: 2.5rem; line-height: 1; color: var(--cream); text-shadow: 0 0 30px rgba(232,105,138,0.3); }
+  .countdown-label { font-size: 9px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; }
+  
+  nav { display: flex; gap: 5px; padding: 0 2rem; border-bottom: 1px solid var(--border); overflow-x: auto; background: rgba(12,8,9,0.5); max-width: 1200px; margin: 0 auto; }
+  nav::-webkit-scrollbar { height: 0; }
+  .nav-btn { background: none; border: none; font-family: var(--sans); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.3s; font-weight: 600; }
+  .nav-btn:hover { color: var(--muted2); background: rgba(255,180,200,0.03); }
+  .nav-btn.active { color: var(--rose); border-bottom-color: var(--pink); text-shadow: 0 0 20px rgba(232,105,138,0.25); }
+
+  /* MAIN CONTENT */
+  main { padding: 2rem; position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+  .panel { display: none; animation: fadeUp 0.4s ease forwards; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+  .sec-head { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; font-weight: 600; }
+  .sec-head::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+
+  /* DAY PROGRESS BAR */
+  .day-progress-wrap { background: rgba(26,17,24,0.7); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; margin-bottom: 2rem; }
+  .dp-header { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
+  .dp-header span:last-child { color: var(--text); font-variant-numeric: tabular-nums; }
+  .dp-track { height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+  .dp-fill { height: 100%; background: linear-gradient(90deg, #bb88ff, #88ddcc); border-radius: 4px; transition: width 0.8s ease; }
+
+  /* TODAY'S BLOCKS */
+  .blocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+  .block-card { background: rgba(26,17,24,0.7); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; cursor: pointer; transition: all 0.2s; position: relative; user-select: none; }
+  .block-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+  .block-card.done { opacity: 0.5; border-color: rgba(136,221,204,0.4); }
+  .block-icon { font-size: 1.8rem; margin-bottom: 12px; }
+  .block-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .block-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  
+  .mark-done-circle { position: absolute; top: 12px; right: 12px; width: 22px; height: 22px; border: 1.5px solid var(--muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .block-card:hover .mark-done-circle { border-color: var(--border2); }
+  .block-card.done .mark-done-circle { background: rgba(136,221,204,0.2); border-color: #88ddcc; }
+  .block-card.done .mark-done-circle::after { content: '✓'; color: #88ddcc; font-size: 12px; font-weight: 700; }
+  
+  .blk-gym { border-left-color: #88ddcc!important; }
+  .blk-travel { border-left-color: #aa88cc!important; }
+  .blk-class { border-left-color: var(--rose)!important; }
+  .blk-cds { border-left-color: #ffcc88!important; }
+  .blk-yt { border-left-color: #ff8888!important; }
+  .blk-gf { border-left-color: #f4a0b5!important; }
+
+  /* GYM & LOG */
+  .gym-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+  .gym-card { background: rgba(26,17,24,0.8); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; position: relative; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255,180,200,0.04); }
+  .gym-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .gcard-push::before { background: linear-gradient(90deg, var(--maroon), var(--pink), var(--rose)); }
+  .gcard-pull::before { background: linear-gradient(90deg, #2a5a50, #88ddcc); }
+  .gcard-legs::before { background: linear-gradient(90deg, #4a2a88, #bb88ff); }
+  .gym-day { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .gym-type { font-family: var(--serif); font-size: 1.6rem; color: var(--cream); margin-bottom: 10px; }
+  .gym-warmup { font-size: 11px; color: var(--muted2); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px; line-height: 1.5; }
+  .ex-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .ex-item { display: flex; justify-content: space-between; font-size: 12px; color: var(--text); }
+  .ex-sets { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .log-form-box { background: rgba(36,25,32,0.6); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+  .log-form { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: center; margin-bottom: 1.5rem; }
+  .log-input { background: rgba(26,17,24,0.8); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; transition: border-color 0.2s; }
+  .log-input:focus { border-color: var(--pink); }
+  .btn-primary { background: linear-gradient(135deg, var(--maroon), var(--deep)); border: 1px solid rgba(232,105,138,0.3); border-radius: 8px; padding: 12px 20px; color: var(--cream); font-family: var(--sans); font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(232,105,138,0.2); }
+  
+  .log-table { width: 100%; border-collapse: collapse; }
+  .log-table th { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .log-table td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text); }
+
+  /* NUTRITION */
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 2rem; }
+  .stat-box { background: rgba(26,17,24,0.8); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; text-align: center; }
+  .stat-num { font-family: var(--serif); font-size: 2.2rem; color: var(--rose); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .quick-add-btn { background: rgba(36,25,32,0.8); border: 1px solid var(--border); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 13px; cursor: pointer; text-align: left; display: block; width: 100%; margin-bottom: 10px; transition: all 0.2s; }
+  .quick-add-btn:hover { border-color: var(--pink); background: rgba(232,105,138,0.05); }
+
+  /* CURRICULUMS */
+  .curr-card { background: rgba(26,17,24,0.8); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.2s; }
+  .curr-card:hover { border-color: var(--border2); }
+  .curr-meta { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .curr-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .curr-sub { font-size: 12px; color: var(--muted2); }
+  .curr-badge { font-size: 9px; padding: 4px 12px; border-radius: 20px; background: rgba(255,180,200,0.1); border: 1px solid var(--border2); color: var(--rose); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+  /* INCOME TIMERS */
+  .timer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+  .timer-card { background: rgba(26,17,24,0.8); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; text-align: center; }
+  .timer-name { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 15px; }
+  .timer-val { font-family: var(--serif); font-size: 3.5rem; color: var(--cream); line-height: 1; margin-bottom: 20px; font-variant-numeric: tabular-nums; }
+  .timer-ctrls { display: flex; gap: 10px; justify-content: center; }
+
+  /* HUAWEI UPLOAD & AI */
+  .upload-box { border: 1px dashed var(--border3); border-radius: 16px; padding: 3rem; text-align: center; cursor: pointer; background: rgba(26,17,24,0.4); transition: all 0.2s; margin-bottom: 2rem; }
+  .upload-box:hover { background: rgba(36,25,32,0.8); border-color: var(--pink); }
+  .upload-title { font-size: 16px; color: var(--cream); font-weight: 500; margin-bottom: 6px; }
+  .upload-sub { font-size: 12px; color: var(--muted); }
+
+  @media(max-width: 768px) {
+    .log-form { grid-template-columns: 1fr 1fr; }
+    .btn-primary { grid-column: span 2; }
+    .focus-title { font-size: 2.2rem; }
+  }
+
+  /* UI OVERHAUL CSS */
+  .sub-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .sub-nav-btn { background: transparent; border: none; color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer; padding: 5px 10px; border-radius: 6px; transition: 0.2s; }
+  .sub-nav-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .sub-nav-btn.active { color: var(--rose); background: rgba(232,105,138,0.1); }
+  
+  .gym-full-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+  .gym-full-grid .gym-card.active { border-color: var(--pink); box-shadow: 0 0 15px rgba(232,105,138,0.2); }
+  
+  .week-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .week-pill { background: rgba(26,17,24,0.8); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+  .week-pill:hover { border-color: var(--pink); }
+  .week-pill.active { background: rgba(232,105,138,0.1); border-color: var(--rose); color: var(--rose); }
+
+  .btn-done { background: rgba(36,25,32,0.8); border: 1px solid var(--border); color: var(--green); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+  .btn-done:hover { background: rgba(45,200,120,0.1); border-color: var(--green); }
+
+
+  .reminder-card { background: rgba(26,17,24,0.8); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; display: flex; align-items: center; gap: 15px; }
+  .reminder-time { color: var(--rose); font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; min-width: 50px; }
+  .reminder-text { color: var(--cream); font-size: 14px; flex: 1; }
+  .reminder-del { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 5px; font-size: 14px; }
+  .reminder-del:hover { color: var(--rose); }
+  </style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- FOCUS OVERLAYS -->
+<div id="focusOverlay" onclick="closeFocus()">
+  <div class="focus-inner" onclick="event.stopPropagation()">
+    
+    <!-- Default -->
+    <div id="focus-default" style="display:none">
+      <div class="focus-time-badge" id="fdTime">00:00</div>
+      <div class="focus-title" id="fdTitle">—</div>
+      <div class="focus-sub" id="fdSub">Operations window active. Execute protocol.</div>
+    </div>
+    
+    <!-- GF Heart -->
+    <div id="focus-gf" style="display:none">
+      <div class="gf-heart-wrap">
+        <svg class="gf-heart-svg" viewBox="0 0 100 90">
+          <defs><radialGradient id="hg" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#ff8fab"/><stop offset="100%" stop-color="#c9184a"/></radialGradient></defs>
+          <path d="M50 80 C50 80 10 55 10 30 C10 15 22 5 35 8 C42 10 47 15 50 20 C53 15 58 10 65 8 C78 5 90 15 90 30 C90 55 50 80 50 80Z" fill="url(#hg)"/>
+          <text x="50" y="46" text-anchor="middle" fill="rgba(255,255,255,0.22)" font-size="12" font-family="Instrument Serif,serif" font-style="italic" letter-spacing="2">indu</text>
+        </svg>
+        <div class="heart-ripple r1"></div><div class="heart-ripple r2"></div>
+      </div>
+      <div class="focus-time-badge" id="fgfTime">18:00</div>
+      <div class="focus-title" style="color:var(--rose)">Presence Block</div>
+      <div class="focus-sub">Put down the metrics. Pick up the conversation.</div>
+    </div>
+
+    <!-- CDS Book -->
+    <div id="focus-cds" style="display:none">
+      <div class="book-wrap">
+        <div class="book">
+          <div class="book-cover">📖</div>
+          <div class="book-page p1"></div><div class="book-page p2"></div>
+        </div>
+      </div>
+      <div class="focus-time-badge" id="fcdsTime">15:00</div>
+      <div class="focus-title" id="fcdsTitle">Study Protocol</div>
+      <div class="focus-sub">Officer Training Academy Prep. No distractions.</div>
+    </div>
+
+    <!-- Gym Fire -->
+    <div id="focus-gym" style="display:none">
+      <div class="gym-fire">🔥</div>
+      <div class="focus-time-badge" id="fgymTime">06:00</div>
+      <div class="focus-title" id="fgymTitle">Training Protocol</div>
+      <div class="focus-sub" id="fgymWarmup">Warmup active. Prepare for execution.</div>
+    </div>
+
+    <!-- Cyclist -->
+    <div id="focus-cycle" style="display:none">
+      <div class="cycle-scene">
+        <div class="cycle-road"></div>
+        <div class="cyclist">
+          <svg viewBox="0 0 80 60" style="width:80px;height:60px">
+            <circle cx="15" cy="45" r="12" fill="none" stroke="#88ddcc" stroke-width="2.5"/>
+            <circle cx="65" cy="45" r="12" fill="none" stroke="#88ddcc" stroke-width="2.5"/>
+            <line x1="15" y1="45" x2="40" y2="20" stroke="#f4a0b5" stroke-width="2.2"/>
+            <line x1="40" y1="20" x2="65" y2="45" stroke="#f4a0b5" stroke-width="2.2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="focus-time-badge" id="fcycTime">07:30</div>
+      <div class="focus-title">Cycling Block</div>
+      <div class="focus-sub">Cardio engine active. 35km transit route.</div>
+    </div>
+
+    
+    <!-- CSE Code -->
+    <div id="focus-cse" style="display:none">
+      <div class="book-wrap" style="color:var(--accent-code); font-size:3rem; margin-bottom:10px;">💻</div>
+      <div class="focus-title" id="fcseTitle" style="color:var(--accent-code)">CSE Protocol</div>
+      <div class="focus-sub" id="fcseSub">Loading CSE content...</div>
+    </div>
+    
+    <button class="focus-close"
+   onclick="closeFocus()">Tap to dismiss</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="hdr-row">
+    <div class="hdr-left">
+      <h1>Hey, <em>let's get it.</em></h1>
+      <div class="hdr-date" id="hdrDate"></div>
+      <div class="daily-quote" id="dailyQuote"></div>
+    </div>
+    <div class="hdr-right">
+      <div class="exam-chip">OTA · Sept 13, 2026</div>
+      <div class="countdown" id="cdNum">—</div>
+      <div class="countdown-label">Days to Exam</div>
+    </div>
+  </div>
+</header>
+
+<!-- NAVIGATION -->
+<nav>
+  <button class="nav-btn active" onclick="switchTab('today',this)">Timeline</button>
+  <button class="nav-btn" onclick="switchTab('gym',this)">Gym & Log</button>
+  <button class="nav-btn" onclick="switchTab('cds',this)">CDS Prep</button>
+  <button class="nav-btn" onclick="switchTab('cse',this)">CSE Learning</button>
+  <button class="nav-btn" onclick="switchTab('nutrition',this)">Nutrition</button>
+  <button class="nav-btn" onclick="switchTab('income',this)">Income</button>
+  <button class="nav-btn" onclick="switchTab('analytics',this)">Body & AI</button>
+  <button class="nav-btn" onclick="switchTab('journal',this)">Journal</button>
+  <button class="nav-btn" onclick="switchTab('trends',this)" id="btnTabTrends">Trends</button>
+  <button class="nav-btn" onclick="switchTab('reminders',this)">Reminders</button>
+</nav>
+
+<main>
+  
+  <!-- BLOCKS -->
+  <div class="panel active" id="tab-today">
+    <div class="day-progress-wrap">
+      <div class="dp-header"><span>Day Progress</span><span id="dpbPct">0%</span></div>
+      <div class="dp-track"><div class="dp-fill" id="dpbFill" style="width:0%"></div></div>
+    </div>
+    <div class="sec-head">Today's Blocks — Tap to mark done</div>
+    <div class="blocks-grid" id="blocksContainer"></div>
+  </div>
+
+  <!-- GYM & LOG -->
+  <div class="panel" id="tab-gym">
+    <div class="sub-nav">
+      <button class="sub-nav-btn active" id="btnGymToday" onclick="switchGymView('today', this)">Today's Session</button>
+      <button class="sub-nav-btn" id="btnGymWeek" onclick="switchGymView('full', this)">Full Week Splits</button>
+    </div>
+
+    <!-- Today View -->
+    <div id="gymTodayView">
+      <div class="sec-head">Target Muscle Group</div>
+      <div class="gym-grid" id="gymGrid"></div>
+      
+      <div class="sec-head">Session Logger</div>
+      <div class="log-form-box">
+        <div class="log-form">
+          <div style="position:relative; z-index:9999;">
+            <input type="text" class="log-input" id="gEx" placeholder="Exercise" style="width:100%; padding-right:30px;" onfocus="showGymDropdown()" onkeyup="filterGymDropdown()" autocomplete="off">
+            <svg style="position:absolute; right:10px; top:14px; pointer-events:none; fill:var(--muted2);" width="12" height="12" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            <div id="gExDropdown" style="display:none; position:absolute; top:calc(100% + 4px); left:0; width:100%; background:#1a1118; border:1px solid var(--pink); border-radius:8px; z-index:99999; max-height:250px; overflow-y:auto; box-shadow: 0 8px 24px rgba(0,0,0,0.8);"></div>
+          </div>
+          <input type="number" class="log-input" id="gWt" placeholder="kg">
+          <input type="number" class="log-input" id="gRep" placeholder="Reps">
+          <input type="number" class="log-input" id="gSet" placeholder="Sets">
+          <button class="btn-primary" onclick="addGymRecord()">Record</button>
+        </div>
+        <table class="log-table">
+          <thead><tr><th>Exercise</th><th>Weight</th><th>Reps</th><th>Sets</th><th style="width:70px; text-align:center;">Actions</th></tr></thead>
+          <tbody id="gymTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Full Week View -->
+    <div id="gymFullWeekView" style="display: none;">
+      <div class="gym-full-grid" id="gymFullGrid"></div>
+    </div>
+  </div>
+
+  <!-- CDS & CSE CURRICULUMS -->
+  <div class="panel" id="tab-cds">
+    <div class="sec-head">CDS Prep — 78 Days to OTA</div>
+    
+    <div class="grid-4" style="margin-bottom: 20px;">
+      <div class="stat-box"><div class="stat-num" id="cdsDaysLeft" style="color:var(--rose)">77</div><div class="stat-label">Days Left</div></div>
+      <div class="stat-box"><div class="stat-num" id="cdsStudyDay" style="color:var(--text)">1</div><div class="stat-label">Study Day</div></div>
+      <div class="stat-box"><div class="stat-num" id="cdsDaysDone" style="color:var(--green)">0</div><div class="stat-label">Days Done</div></div>
+      <div class="stat-box"><div class="stat-num" id="cdsStreak" style="color:var(--accent-warn)">0 🔥</div><div class="stat-label">Streak</div></div>
+    </div>
+
+    <div class="log-form-box" style="padding:1.5rem; margin-bottom:20px;">
+      <div class="sec-head" style="margin-top:0; font-size:0.8rem; letter-spacing:2px; color:var(--muted)">OTA READINESS</div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600;"><span>English</span><span id="engPct">0%</span></div>
+        <div class="dp-track"><div class="dp-fill" style="width:0%"></div></div>
+      </div>
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600;"><span>GK</span><span id="gkPct">0%</span></div>
+        <div class="dp-track"><div class="dp-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="week-nav" id="cdsWeekNav"></div>
+    <div id="cdsContainer" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;"></div>
+  </div>
+
+  <div class="panel" id="tab-cse">
+    <div class="sec-head">CSE Learning — 10 Weeks</div>
+    
+    <div class="grid-4" style="margin-bottom: 20px;">
+      <div class="stat-box"><div class="stat-num" id="cseCurrentDay" style="color:var(--green)">1</div><div class="stat-label">Current Day</div></div>
+      <div class="stat-box"><div class="stat-num" id="cseDaysDone" style="color:var(--text)">0</div><div class="stat-label">Done</div></div>
+      <div class="stat-box"><div class="stat-num" id="csePhase" style="color:var(--rose)">1</div><div class="stat-label">Phase</div></div>
+      <div class="stat-box"><div class="stat-num" id="cseStreak" style="color:var(--accent-warn)">0 🔥</div><div class="stat-label">Streak</div></div>
+    </div>
+
+    <div class="week-nav" id="cseWeekNav"></div>
+    <div id="cseContainer" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;"></div>
+  </div>
+
+  <!-- NUTRITION -->
+  <div class="panel" id="tab-nutrition">
+    <div class="sec-head" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Macro Tracking Realtime</span>
+      <button onclick="resetMacros()" style="background:transparent; border:1px solid var(--accent-warn); border-radius:4px; color:var(--accent-warn); cursor:pointer; font-size:11px; padding:4px 8px;">Reset Today</button>
+    </div>
+    <div class="grid-4">
+      <div class="stat-box"><div class="stat-num" id="nCal">0</div><div class="stat-label">Calories</div></div>
+      <div class="stat-box"><div class="stat-num" id="nProt" style="color:var(--accent-code)">0g</div><div class="stat-label">Protein</div></div>
+      <div class="stat-box"><div class="stat-num" id="nCarb" style="color:var(--accent-warn)">0g</div><div class="stat-label">Carbs</div></div>
+      <div class="stat-box"><div class="stat-num" id="nFat">0g</div><div class="stat-label">Fats</div></div>
+    </div>
+
+    <!-- HYDRATION TRACKER -->
+    <div style="margin-top:20px; margin-bottom:20px; background:var(--surface2); padding:1rem; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="sec-head" style="margin-top:0; margin-bottom:5px;">Hydration</div>
+        <div style="font-size:12px; color:var(--muted)">Target: 4L / 16 Glasses</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:15px;">
+        <div style="font-size:24px; font-weight:800; color:#3b82f6" id="hGlass">0 <span style="font-size:14px; font-weight:400; color:var(--muted)">glasses</span></div>
+        <button class="btn-primary" style="background:#3b82f6; color:#fff;" onclick="addWater()">+ 1 Glass</button>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
+      
+      <!-- SAVED MEALS -->
+      <div>
+        <div class="sec-head">Saved Meals</div>
+        <div id="savedMealsGrid" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="sec-head">Barcode Scanner</div>
+        <div class="log-form-box" style="padding:1rem; text-align:center;">
+          <div id="reader" style="width: 100%; border-radius:12px; overflow:hidden; margin-bottom:10px; display:none;"></div>
+          <button class="btn-primary" id="scanBtn" style="width:100%" onclick="toggleScanner()">Scan Barcode</button>
+        </div>
+      </div>
+
+      <!-- MEAL BUILDER -->
+      <div>
+        <div class="sec-head">Meal Builder</div>
+        <div class="log-form-box" style="padding:1rem;">
+          <input type="text" class="log-input" id="mName" placeholder="Meal Name (e.g. Mukul's Oats)" style="width:100%; margin-bottom:10px;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <input type="number" class="log-input" id="mCal" placeholder="Kcal">
+            <input type="number" class="log-input" id="mProt" placeholder="Protein">
+            <input type="number" class="log-input" id="mCarb" placeholder="Carbs">
+            <input type="number" class="log-input" id="mFat" placeholder="Fats">
+          </div>
+          <button class="btn-primary" style="width:100%; margin-bottom:10px;" onclick="saveCustomMeal()">Save Meal</button>
+          
+          <div class="sec-head" style="margin-top:1.5rem; margin-bottom:0.5rem;">Quick Manual Add</div>
+          <button class="btn-primary" style="width:100%; background:var(--surface3); color:var(--text); border:1px solid var(--border);" onclick="addCustomFood()">Log Macros Only</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCOME TIMERS -->
+  <div class="panel" id="tab-income">
+    <div class="sec-head">Second Income · 5hr Window</div>
+    <div class="log-form-box" style="padding:1rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+      <div style="color:var(--muted)">Window remaining today<br><span style="font-size:12px;">YT max 2.5hr · UGC + App Dev open</span></div>
+      <div style="font-size:1.8rem; font-weight:700; color:var(--accent-warn); font-family:'JetBrains Mono', monospace;">5:00:00</div>
+    </div>
+
+    <div class="timer-grid">
+      <div class="timer-card" style="grid-column: span 1;">
+        <div class="timer-name" style="text-transform:uppercase; letter-spacing:2px; font-size:0.8rem; color:var(--muted);">YouTube</div>
+        <div class="timer-val" id="displayYT" style="font-size:3.5rem; margin:15px 0;">00:00:00</div>
+        <div style="color:var(--muted); font-size:0.85rem; margin-bottom:20px;">Max 2.5 hours daily</div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button class="btn-primary" style="padding:8px 20px;" onclick="toggleTimer('yt')">Start</button>
+          <button class="btn-primary" style="padding:8px 20px; background:transparent; border:1px solid var(--border);" onclick="toggleTimer('yt')">Pause</button>
+        </div>
+      </div>
+      
+      <div class="timer-card" style="grid-column: span 1;">
+        <div class="timer-name" style="text-transform:uppercase; letter-spacing:2px; font-size:0.8rem; color:var(--muted);">UGC Creation</div>
+        <div class="timer-val" id="displayUGC" style="font-size:3.5rem; margin:15px 0; color:var(--rose);">00:00:00</div>
+        <div style="color:var(--muted); font-size:0.85rem; margin-bottom:20px;">Track time spent</div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button class="btn-primary" style="padding:8px 20px;" onclick="toggleTimer('ugc')">Start</button>
+          <button class="btn-primary" style="padding:8px 20px; background:transparent; border:1px solid var(--border);" onclick="toggleTimer('ugc')">Pause</button>
+        </div>
+      </div>
+
+      <div class="timer-card" style="grid-column: span 1;">
+        <div class="timer-name" style="text-transform:uppercase; letter-spacing:2px; font-size:0.8rem; color:var(--muted);">App Dev</div>
+        <div class="timer-val" id="displayApp" style="font-size:3.5rem; margin:15px 0; color:var(--green);">00:00:00</div>
+        <div style="color:var(--muted); font-size:0.85rem; margin-bottom:20px;">Track time spent</div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button class="btn-primary" style="padding:8px 20px;" onclick="toggleTimer('app')">Start</button>
+          <button class="btn-primary" style="padding:8px 20px; background:transparent; border:1px solid var(--border);" onclick="toggleTimer('app')">Pause</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-head" style="margin-top:3rem">Log Session Note</div>
+    <div style="display:flex; gap:10px;">
+      <select class="log-input" style="width:150px; cursor:pointer;">
+        <option>YouTube</option>
+        <option>UGC Creation</option>
+        <option>App Dev</option>
+      </select>
+      <input type="text" class="log-input" style="flex:1;" placeholder="What did you work on?">
+      <button class="btn-primary" style="padding:0 25px;">Log</button>
+    </div>
+  </div>
+
+  <!-- HUAWEI & AI -->
+  <div class="panel" id="tab-analytics">
+    <div class="sec-head">Huawei Data Sync</div>
+    <div class="upload-box" onclick="document.getElementById('fileAttachment').click()">
+      <input type="file" id="fileAttachment" accept="image/*" multiple style="display:none" onchange="handleScreenshots(event)">
+      <div style="font-size:2.5rem; margin-bottom:10px;">📸</div>
+      <div class="upload-title">Drop Health Screenshots Here</div>
+      <div class="upload-sub">Upload up to 3 screenshots (Steps, Sleep, Workout).</div>
+      <div id="imagePreviewContainer" style="display:flex; gap:10px; justify-content:center; margin-top:15px; flex-wrap:wrap;"></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:2rem">Gemini AI Overseer</div>
+    <div class="log-form-box" style="font-size:13px; color:var(--text); line-height:1.7;">
+      <div style="margin-bottom:12px; font-weight:bold; color:var(--pink)">Backend AI Integration</div>
+      <div style="color:var(--muted); font-size:12px; margin-bottom:20px;">Secure connection via Firebase Cloud Functions. API key is stored safely in Secret Manager.</div>
+
+      <div id="aiReportBox">
+        <em>Awaiting Analysis...</em><br><br>
+        The AI Overseer takes your Huawei stats, Gym Logs, Nutrition, and Study pacing and analyzes your progress toward the Greek God physique and academic goals.
+      </div>
+      <button class="btn-primary" style="width:100%; margin-top: 15px;" onclick="generateAIAnalysis()">Generate Daily Analysis</button>
+    </div>
+  </div>
+
+
+  <!-- PROGRESS TAB -->
+  <div class="panel" id="tab-progress">
+    <div style="font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--muted); margin-bottom:30px; text-align:center;">60-Day Transformation</div>
+    <div class="progress-hero" style="background:rgba(26,17,24,0.8); border:1px solid var(--border); border-radius:16px; padding:3rem 1rem; text-align:center; margin-bottom:20px;">
+      <div style="width:50px; height:6px; background:var(--rose); margin:0 auto 20px auto; border-radius:3px;"></div>
+      <div style="font-size:13px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:10px;">Of 60 Days</div>
+      <div id="progHeroText" style="color:#d4af37; font-size:1.2rem; font-weight:500;">Starts July 1, 2026</div>
+    </div>
+    
+    <div class="phase-card" style="background:rgba(26,17,24,0.8); border:1px solid var(--border); border-radius:12px; padding:1.5rem; text-align:center; margin-bottom:15px;">
+      <div style="color:var(--rose); font-size:14px; font-weight:600; letter-spacing:2px; margin-bottom:5px;">UPPER PEEL</div>
+      <div style="font-size:12px; font-family:monospace; color:var(--muted); margin-bottom:5px;">Days 1-20</div>
+      <div style="font-size:13px; color:var(--text);">Cut + build base</div>
+    </div>
+    
+    <div class="phase-card" style="background:rgba(26,17,24,0.8); border:1px solid var(--border); border-radius:12px; padding:1.5rem; text-align:center; margin-bottom:15px;">
+      <div style="color:var(--pink); font-size:14px; font-weight:600; letter-spacing:2px; margin-bottom:5px;">DEEP BURN</div>
+      <div style="font-size:12px; font-family:monospace; color:var(--muted); margin-bottom:5px;">Days 21-45</div>
+      <div style="font-size:13px; color:var(--text);">Aggressive shred</div>
+    </div>
+    
+    <div class="phase-card" style="background:rgba(26,17,24,0.8); border:1px solid var(--border); border-radius:12px; padding:1.5rem; text-align:center; margin-bottom:15px;">
+      <div style="color:#d4af37; font-size:14px; font-weight:600; letter-spacing:2px; margin-bottom:5px;">DREAM WINDOW</div>
+      <div style="font-size:12px; font-family:monospace; color:var(--muted); margin-bottom:5px;">Days 46-60</div>
+      <div style="font-size:13px; color:var(--text);">Carb cycle + perfect condition</div>
+    </div>
+  </div>
+
+  <!-- TRENDS TAB -->
+  <div class="panel" id="tab-trends">
+    <div class="sec-head" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Historical Data</span>
+      <button class="btn-primary" style="padding: 6px 12px; font-size: 11px;" onclick="loadHistoricalTrends()">Refresh Data</button>
+    </div>
+    
+    <div id="trendsContainer" style="display:flex; flex-direction:column; gap:20px;">
+      <div style="text-align:center; padding: 2rem; color:var(--muted); font-size:14px;">
+        Click Refresh to load historical progress from Firestore...
+      </div>
+    </div>
+  </div>
+
+  <!-- REMINDERS TAB -->
+  <div class="panel" id="tab-reminders">
+    <div class="day-progress-wrap" style="background:rgba(26,17,24,0.8); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:30px;">
+      <div class="dp-header">
+        <span style="font-size:11px; letter-spacing:2px; color:var(--muted); text-transform:uppercase;">Day Progress</span>
+        <span id="remDayPct" style="color:var(--rose); font-weight:bold;">0%</span>
+      </div>
+      <div class="dp-track" style="background:var(--border3);"><div class="dp-fill" id="remDayFill" style="background:linear-gradient(90deg, var(--rose), var(--pink)); width:0%"></div></div>
+      <div style="margin-top:10px; font-size:13px; color:var(--text);">Now: <strong id="remDayNow">Loading...</strong></div>
+    </div>
+    
+    <div style="font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--muted); margin-bottom:15px;">REMINDERS</div>
+    <div id="remindersContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
+    
+    <div style="display:flex; gap:10px;">
+      <input type="time" class="log-input" id="newRemTime" style="width:100px; padding:10px;">
+      <input type="text" class="log-input" id="newRemText" placeholder="Reminder..." style="flex:1;">
+      <button class="btn-primary" onclick="addReminder()" style="padding:0 25px;">Add</button>
+    </div>
+  </div>
+
+  <!-- JOURNAL TAB -->
+  <div class="panel" id="tab-journal">
+    <div class="sec-head">Daily Journal & Gratitude</div>
+    <div class="log-form-box" style="margin-bottom:20px;">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:15px;">
+        Dump your thoughts here. The Gemini AI Overseer will read this to understand your mental state and adapt its coaching style to support you better.
+      </div>
+      <textarea id="journalInput" class="log-input" style="width:100%; height:200px; padding:15px; resize:vertical; font-family:var(--sans); margin-bottom:15px; line-height:1.6;" placeholder="How are you feeling today? What are you grateful for?"></textarea>
+      
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+        <input type="checkbox" id="journalBackdate" style="cursor:pointer; width:16px; height:16px; accent-color:var(--rose);">
+        <label for="journalBackdate" style="font-size:13px; color:var(--text); cursor:pointer;">Log for yesterday night (missed entry)</label>
+      </div>
+      
+      <button class="btn-primary" style="width:100%;" onclick="saveJournal()">Save Journal Entry</button>
+    </div>
+    <div class="sec-head">Recent Entries</div>
+    <div id="journalEntriesContainer" style="display:flex; flex-direction:column; gap:15px;"></div>
+  </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('SW registered: ', registration);
+        }).catch(registrationError => {
+          console.log('SW registration failed: ', registrationError);
+        });
+      });
+    }
+  </script>
+<script>
+// ==========================================
+// FIREBASE CONFIG & INIT
+// ==========================================
+const firebaseConfig = {
+  projectId: "omand-center",
+  appId: "1:398895309392:web:0012e23137478a13e0e755",
+  storageBucket: "omand-center.firebasestorage.app",
+  apiKey: "AIzaSyCJKQmq9GaBsOTQSnobC0pJIQ9H8cj2gmA",
+  authDomain: "omand-center.firebaseapp.com",
+  messagingSenderId: "398895309392",
+  measurementId: "G-BE9X3RXR38"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const functions = firebase.functions();
+
+// ==========================================
+// STATE & NAVIGATION
+// ==========================================
+
+let macros = { c:0, p:0, cb:0, f:0 };
+let timers = { yt: { e:0, int:null }, ugc: { e:0, int:null }, app: { e:0, int:null } };
+let uploadedScreenshots = [];
+let cc_cds_done = [];
+let cc_cse_done = [];
+let customMeals = [];
+let remindersData = [
+  {time: "06:00", text: "Wake up — 10 vocab words before anything else"},
+  {time: "10:05", text: "CDS block starts NOW"},
+  {time: "21:00", text: "Wind down — CDS review"}
+];
+let hydrationGlasses = 0;
+let completedBlocks = [];
+let gymToday = [];
+const todayStr = new Date().toISOString().split('T')[0];
+
+function savePreferences() {
+  db.collection("user_data").doc("preferences").set({
+    customMeals: customMeals,
+    remindersData: remindersData,
+    cc_cds_done: cc_cds_done,
+    cc_cse_done: cc_cse_done
+  }, { merge: true });
+}
+
+function initCloudSync() {
+  // Global Sync
+  db.collection("user_data").doc("preferences").onSnapshot(doc => {
+    if (doc.exists) {
+      const data = doc.data();
+      if(data.customMeals) customMeals = data.customMeals;
+      if(data.remindersData) remindersData = data.remindersData;
+      if(data.cc_cds_done) cc_cds_done = data.cc_cds_done;
+      if(data.cc_cse_done) cc_cse_done = data.cc_cse_done;
+      
+      renderSavedMeals();
+      renderReminders();
+      buildCurriculums(window.lastCalculatedDay || 1);
+    }
+  });
+
+  // Daily Live Sync
+  db.collection("daily_logs").doc(todayStr).onSnapshot(doc => {
+    if (doc.exists) {
+      const data = doc.data();
+      if(data.macros) macros = data.macros;
+      if(data.hydration !== undefined) hydrationGlasses = data.hydration;
+      if(data.completedBlocks) {
+        completedBlocks = data.completedBlocks;
+        completedBlocks.forEach(i => {
+          const el = document.getElementById(`block-${i}`);
+          if (el) el.classList.add('done');
+        });
+        updateDayProgress();
+      }
+      if(data.gymToday) {
+        gymToday = data.gymToday;
+        const tbody = document.getElementById("gymTableBody");
+        if (tbody) renderGymTable();
+      }
+      
+      renderMacros();
+      const hGlass = document.getElementById("hGlass");
+      if(hGlass) hGlass.innerHTML = `${hydrationGlasses} <span style="font-size:14px; font-weight:400; color:var(--muted)">glasses</span>`;
+    }
+  });
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + id).classList.add("active");
+  btn.classList.add("active");
+}
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+
+let currentCdsWeek = 1;
+let currentCseWeek = 1;
+function init() {
+  initCloudSync();
+  
+  // Header Dates
+  const now = new Date();
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  document.getElementById("hdrDate").textContent = `${days[now.getDay()]} ${months[now.getMonth()]} ${now.getDate()} ${now.getFullYear()}`;
+  document.getElementById("dailyQuote").textContent = `"${QUOTES[Math.floor(Math.random()*QUOTES.length)]}"`;
+  
+  // Countdown
+  now.setHours(0,0,0,0);
+  const diff = Math.max(0, Math.ceil((EXAM_DATE - now)/86400000));
+  const cdNum = document.getElementById("cdNum");
+  if (cdNum) cdNum.textContent = diff;
+  const cdsDays = document.getElementById("cdsDays");
+  if (cdsDays) cdsDays.textContent = diff;
+
+  // Build Sections
+  buildBlocks();
+  initProgressTab();
+  renderReminders();
+  updateDayProgressClock();
+  buildGym();
+  buildCurriculums(Math.max(1, Math.ceil((now - START_DATE)/86400000)));
+  renderSavedMeals();
+}
+
+// ==========================================
+// CORE LOGIC
+// ==========================================
+function switchTab(id, btn) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + id).classList.add("active");
+  btn.classList.add("active");
+}
+
+function buildBlocks() {
+  document.getElementById("blocksContainer").innerHTML = SCHEDULE.map((s, i) => `
+    <div class="block-card ${s.cls} ${completedBlocks.includes(i) ? 'done' : ''}" id="block-${i}" style="animation: fadeUp 0.4s ease forwards ${i*0.05}s; opacity:0; transform:translateY(15px);">
+      <div class="mark-done-circle" onclick="toggleBlockDone(event, ${i})"></div>
+      <div onclick="triggerOverlay('${s.cls}', '${s.title}')">
+        <div class="block-icon" style="margin-bottom:10px; font-size:1.8rem;">${s.icon}</div>
+        <div class="block-title" style="font-size:1.4rem;">${s.title}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleBlockDone(e, i) {
+  e.stopPropagation(); // Prevent overlay from opening
+  const el = document.getElementById(`block-${i}`);
+  if (el) {
+    el.classList.toggle('done');
+    if (el.classList.contains('done')) {
+      if (!completedBlocks.includes(i)) completedBlocks.push(i);
+    } else {
+      completedBlocks = completedBlocks.filter(b => b !== i);
+    }
+    db.collection("daily_logs").doc(todayStr).set({ completedBlocks: completedBlocks }, { merge: true });
+    updateDayProgress();
+  }
+}
+
+function updateDayProgress() {
+  const total = document.querySelectorAll('.block-card').length;
+  if(total === 0) return;
+  const done = document.querySelectorAll('.block-card.done').length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('dpbPct').textContent = `${pct}%`;
+  document.getElementById('dpbFill').style.width = `${pct}%`;
+}
+
+function buildGym() {
+  const dayStr = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
+  const g = GYM_SPLIT.find(x => x.d === dayStr) || GYM_SPLIT[0];
+  
+  const todayHtml = `
+    <div class="gym-card ${g.c}">
+      <div class="gym-day">${g.d}</div>
+      <div class="gym-type">${g.t}</div>
+      <div class="gym-warmup"><strong>Optimal Warmup:</strong> ${g.w}</div>
+      <ul class="ex-list">
+        ${g.ex.map(e => `
+          <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:4px;">
+              <span style="font-weight:600;">${e.name}</span>
+              <span class="ex-sets">${e.sets}</span>
+            </div>
+            ${e.note ? `<div style="font-size:11px; color:var(--muted2); line-height:1.4;"><i>↳ ${e.note}</i></div>` : ''}
+          </li>
+        `).join('')}
+      </ul>
+    </div>`;
+  const grid = document.getElementById("gymGrid");
+  if(grid) grid.innerHTML = todayHtml;
+
+  const COMMON_EXERCISES = [
+    "Bench Press", "Incline DB Press", "Decline Bench Press", "Dumbbell Bench Press", "Chest Press", "Chest Flyes", "Cable Flyes", "Pec Deck Flyes", "Push-ups", "Dips",
+    "Squat", "Leg Press", "Lunges", "Leg Extensions", "Leg Curls", "Calf Raises", "Romanian Deadlift", "Bulgarian Split Squat",
+    "Deadlift", "Pull-ups", "Lat Pulldown", "Barbell Row", "Dumbbell Row", "Seated Cable Row", "T-Bar Row", "Straight Arm Pulldown",
+    "Overhead Press", "Lateral Raises", "Front Raises", "Reverse Pec Deck", "Face Pulls", "Upright Row",
+    "Barbell Curls", "Dumbbell Curls", "Hammer Curls", "Preacher Curls", "Concentration Curls", "Cable Curls",
+    "Tricep Pushdown", "Skull Crushers", "Overhead Tricep Extension", "Tricep Kickbacks", "Close-Grip Bench Press",
+    "Crunches", "Plank", "Leg Raises", "Russian Twists", "Ab Wheel Rollout", "Cable Crunches"
+  ];
+  
+  let allEx = [...COMMON_EXERCISES];
+  if (typeof GYM_SPLIT !== 'undefined') {
+    GYM_SPLIT.forEach(split => {
+      split.ex.forEach(e => allEx.push(e.name));
+    });
+  }
+  
+  const uniqueEx = [...new Set(allEx)].sort();
+  window.gymExercises = uniqueEx;
+
+  const fullHtml = GYM_SPLIT.map(split => `
+    <div class="gym-card ${split.c} ${split.d === dayStr ? 'active' : ''}">
+      <div class="gym-day">${split.d}</div>
+      <div class="gym-type" style="font-size:14px;">${split.t}</div>
+      <div class="gym-warmup" style="font-size:11px; margin-bottom:10px;">${split.w}</div>
+      <ul class="ex-list">
+        ${split.ex.map(e => `
+          <li class="ex-item" style="padding:6px 0; border-bottom: 1px solid rgba(255,180,200,0.05); justify-content:space-between;">
+            <span style="font-size:12px;">${e.name}</span>
+            <span style="font-size:11px; color:var(--muted2);">${e.sets}</span>
+          </li>
+        `).join('')}
+      </ul>
+    </div>`).join('');
+  const fullGrid = document.getElementById("gymFullGrid");
+  if(fullGrid) fullGrid.innerHTML = fullHtml;
+}
+
+function switchGymView(view, btn) {
+  document.getElementById('btnGymToday').classList.remove('active');
+  document.getElementById('btnGymWeek').classList.remove('active');
+  btn.classList.add('active');
+  
+  if(view === 'today') {
+    document.getElementById('gymTodayView').style.display = 'block';
+    document.getElementById('gymFullWeekView').style.display = 'none';
+  } else {
+    document.getElementById('gymTodayView').style.display = 'none';
+    document.getElementById('gymFullWeekView').style.display = 'block';
+  }
+}
+
+
+function renderGymTable() {
+  const tbody = document.getElementById("gymTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = gymToday.map((g, idx) => `
+    <tr>
+      <td>${g.ex}</td>
+      <td>${g.wt}kg</td>
+      <td>${g.rp}</td>
+      <td>${g.st}</td>
+      <td style="text-align:center;">
+        <button onclick="editGymRecord(${idx})" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:14px; margin-right:5px;">✏️</button>
+        <button onclick="deleteGymRecord(${idx})" style="background:none; border:none; color:var(--accent-warn); cursor:pointer; font-size:14px;">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deleteGymRecord(idx) {
+  if(!confirm("Delete this set?")) return;
+  gymToday.splice(idx, 1);
+  db.collection("daily_logs").doc(todayStr).set({ gymToday: gymToday }, { merge: true });
+}
+
+function editGymRecord(idx) {
+  const r = gymToday[idx];
+  document.getElementById("gEx").value = r.ex;
+  document.getElementById("gWt").value = r.wt;
+  document.getElementById("gRep").value = r.rp;
+  document.getElementById("gSet").value = r.st;
+  gymToday.splice(idx, 1);
+  db.collection("daily_logs").doc(todayStr).set({ gymToday: gymToday }, { merge: true });
+}
+
+function addGymRecord() {
+  const ex = document.getElementById("gEx").value;
+  const wt = document.getElementById("gWt").value;
+  const rp = document.getElementById("gRep").value;
+  const st = document.getElementById("gSet").value;
+  if(!ex || !wt) return;
+  gymToday.push({ ex, wt, rp, st });
+  db.collection("daily_logs").doc(todayStr).set({ gymToday: gymToday }, { merge: true });
+  document.getElementById("gEx").value = '';
+}
+
+// Globals are handled by initCloudSync()
+
+function markCdsDone(day) {
+  if (!cc_cds_done.includes(day)) {
+    cc_cds_done.push(day);
+    savePreferences();
+    buildCurriculums(window.lastCalculatedDay || 1);
+  }
+}
+
+function markCseDone(day) {
+  if (!cc_cse_done.includes(day)) {
+    cc_cse_done.push(day);
+    savePreferences();
+    buildCurriculums(window.lastCalculatedDay || 1);
+  }
+}
+
+function calculateStreak(arr) {
+  if(arr.length === 0) return 0;
+  let sorted = [...arr].sort((a,b)=>b-a);
+  let streak = 1;
+  for(let i=0; i<sorted.length-1; i++) {
+    if(sorted[i] - sorted[i+1] === 1) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function buildCurriculums(currentDay) {
+  window.lastCalculatedDay = currentDay;
+  // Update Header Stats for CDS
+  const cdsDay = Math.min(CDS.length, Math.max(1, currentDay));
+  const cdsDoneCount = cc_cds_done.length;
+  if(document.getElementById("cdsStudyDay")) document.getElementById("cdsStudyDay").textContent = cdsDay;
+  if(document.getElementById("cdsDaysLeft")) document.getElementById("cdsDaysLeft").textContent = 78 - cdsDoneCount;
+  if(document.getElementById("cdsDaysDone")) document.getElementById("cdsDaysDone").textContent = cdsDoneCount;
+  if(document.getElementById("cdsStreak")) document.getElementById("cdsStreak").textContent = calculateStreak(cc_cds_done) + " 🔥";
+
+  // Update Header Stats for CSE
+  const cseDay = Math.min(CSE.length, Math.max(1, currentDay));
+  const cseDoneCount = cc_cse_done.length;
+  const currCsePhase = CSE.find(x => x.d === cseDay)?.ph.replace('PHASE ','').split('-')[0].trim() || '1';
+  if(document.getElementById("cseCurrentDay")) document.getElementById("cseCurrentDay").textContent = cseDay;
+  if(document.getElementById("csePhase")) document.getElementById("csePhase").textContent = currCsePhase;
+  if(document.getElementById("cseDaysDone")) document.getElementById("cseDaysDone").textContent = cseDoneCount;
+  if(document.getElementById("cseStreak")) document.getElementById("cseStreak").textContent = calculateStreak(cc_cse_done) + " 🔥";
+
+  // Render initial weeks based on current day
+  const cdsWkObj = CDS.find(x => x.d === cdsDay) || CDS[0];
+  const cseWkObj = CSE.find(x => x.d === cseDay) || CSE[0];
+  
+  if(!window.currentCdsWeek) currentCdsWeek = cdsWkObj.wk;
+  if(!window.currentCseWeek) currentCseWeek = cseWkObj.wk;
+
+  renderCDS();
+  renderCSE();
+}
+
+
+
+function initProgressTab() {
+  const today = new Date();
+  const tStart = new Date("2026-07-01");
+  const diffTime = today - tStart;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if(diffDays <= 0) {
+    document.getElementById("progHeroText").textContent = "Starts July 1, 2026";
+  } else if (diffDays <= 60) {
+    document.getElementById("progHeroText").textContent = "DAY " + diffDays;
+    document.getElementById("progHeroText").style.fontSize = "2.5rem";
+  } else {
+    document.getElementById("progHeroText").textContent = "TRANSFORMATION COMPLETE";
+  }
+}
+
+// Globals are handled by initCloudSync()
+
+function renderReminders() {
+  const container = document.getElementById("remindersContainer");
+  if(!container) return;
+  
+  // Sort by time
+  remindersData.sort((a,b) => a.time.localeCompare(b.time));
+  
+  container.innerHTML = remindersData.map((r, i) => `
+    <div class="reminder-card">
+      <div class="reminder-time">${r.time}</div>
+      <div class="reminder-text">${r.text}</div>
+      <button class="reminder-del" onclick="deleteReminder(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function addReminder() {
+  const time = document.getElementById("newRemTime").value;
+  const text = document.getElementById("newRemText").value;
+  if(!time || !text) return;
+  remindersData.push({time, text});
+  savePreferences();
+  document.getElementById("newRemTime").value = "";
+  document.getElementById("newRemText").value = "";
+  renderReminders();
+}
+
+function deleteReminder(i) {
+  remindersData.splice(i, 1);
+  savePreferences();
+  renderReminders();
+}
+
+function updateDayProgressClock() {
+  const now = new Date();
+  const hrs = now.getHours();
+  const mins = now.getMinutes();
+  const totalMins = hrs * 60 + mins;
+  const pct = Math.min(100, Math.round((totalMins / 1440) * 100));
+  
+  const pctEl = document.getElementById("remDayPct");
+  const fillEl = document.getElementById("remDayFill");
+  if(pctEl) pctEl.textContent = pct + "%";
+  if(fillEl) fillEl.style.width = pct + "%";
+  
+  let currentActivity = "Sleep";
+  if(hrs >= 6 && hrs < 7) currentActivity = "Gym Session";
+  else if(hrs >= 7 && hrs < 8) currentActivity = "Cycle Transit";
+  else if(hrs >= 8 && hrs < 15) currentActivity = "Deep Work / Income";
+  else if(hrs >= 15 && hrs < 18) currentActivity = "CDS Study Protocol";
+  else if(hrs >= 18 && hrs < 21) currentActivity = "Presence Block (Indu)";
+  else if(hrs >= 21 && hrs < 22) currentActivity = "CSE Protocol & Wind down";
+  
+  const nowEl = document.getElementById("remDayNow");
+  if(nowEl) nowEl.textContent = currentActivity;
+  
+  setTimeout(updateDayProgressClock, 60000); // update every minute
+}
+
+function renderCDS() {
+  // Build Nav
+  const totalWeeks = 12;
+  let navHtml = '';
+  for(let i=1; i<=totalWeeks; i++) {
+    navHtml += `<button class="week-pill ${i === currentCdsWeek ? 'active' : ''}" onclick="currentCdsWeek=${i}; renderCDS()">Week ${i}</button>`;
+  }
+  const cdsNav = document.getElementById("cdsWeekNav");
+  if(cdsNav) cdsNav.innerHTML = navHtml;
+
+  // Build Container
+  const days = CDS.filter(x => x.wk === currentCdsWeek);
+  let html = days.map(d => {
+    const isDone = cc_cds_done.includes(d.d);
+    return `
+    <div class="curr-card ${isDone ? 'done' : ''}" style="align-items:flex-start; flex-direction:column; padding: 1.5rem; gap:10px; ${isDone ? 'opacity:0.6; border-color:var(--accent-code);' : ''}">
+      <div style="display:flex; justify-content:space-between; width:100%;">
+        <div class="curr-meta">Day ${d.d} · Phase ${d.ph} · ${d.sub}</div>
+        <div class="curr-badge">${d.type}</div>
+      </div>
+      <div class="curr-title" style="font-size:1.1rem; color:var(--cream);">${d.topic}</div>
+      <div class="curr-sub" style="font-size:13px;">${d.detail}</div>
+      <div style="font-size:11px; color:var(--muted); font-style:italic; margin-top:5px;">"${QUOTES[Math.floor(Math.random()*QUOTES.length)]}"</div>
+      ${isDone ? 
+        `<button class="btn-done" style="margin-top:10px; align-self:flex-end; background:var(--accent-code); color:var(--bg); border:none;" disabled>COMPLETED</button>` : 
+        `<button class="btn-done" style="margin-top:10px; align-self:flex-end;" onclick="markCdsDone(${d.d})">Mark Done</button>`}
+    </div>
+  `}).join('');
+  const cdsCont = document.getElementById("cdsContainer");
+  if(cdsCont) cdsCont.innerHTML = html;
+}
+
+function renderCSE() {
+  // Build Nav
+  const totalWeeks = 10;
+  let navHtml = '';
+  for(let i=1; i<=totalWeeks; i++) {
+    navHtml += `<button class="week-pill ${i === currentCseWeek ? 'active' : ''}" onclick="currentCseWeek=${i}; renderCSE()">Week ${i}</button>`;
+  }
+  const cseNav = document.getElementById("cseWeekNav");
+  if(cseNav) cseNav.innerHTML = navHtml;
+
+  // Build Container
+  const days = CSE.filter(x => x.wk === currentCseWeek);
+  let html = days.map(d => {
+    const isDone = cc_cse_done.includes(d.d);
+    return `
+    <div class="curr-card ${isDone ? 'done' : ''}" style="align-items:flex-start; flex-direction:column; padding: 1.5rem; gap:10px; ${isDone ? 'opacity:0.6; border-color:var(--accent-code);' : ''}">
+      <div style="display:flex; justify-content:space-between; width:100%;">
+        <div class="curr-meta">Day ${d.d} · Week ${d.wk} · ${d.ph}</div>
+        <div class="curr-badge" style="background:transparent; border-color:var(--border3); color:var(--text); border-radius:6px; padding:3px 10px;">${d.type}</div>
+      </div>
+      <div class="curr-title" style="font-size:1.1rem; color:var(--cream);">${d.topic}</div>
+      <div class="curr-sub" style="font-size:13px;">${d.detail}</div>
+      <div style="font-size:11px; color:var(--muted); font-style:italic; margin-top:5px;">"${QUOTES[Math.floor(Math.random()*QUOTES.length)]}"</div>
+      ${isDone ? 
+        `<button class="btn-done" style="margin-top:10px; align-self:flex-end; background:var(--accent-code); color:var(--bg); border:none;" disabled>COMPLETED</button>` : 
+        `<button class="btn-done" style="margin-top:10px; align-self:flex-end;" onclick="markCseDone(${d.d})">Mark Done</button>`}
+    </div>
+  `}).join('');
+  const cseCont = document.getElementById("cseContainer");
+  if(cseCont) cseCont.innerHTML = html;
+}
+
+// ==========================================
+// NUTRITION, MACROS & HYDRATION
+// ==========================================
+// Globals are handled by initCloudSync()
+// Globals are handled by initCloudSync()
+
+function addWater() {
+  hydrationGlasses++;
+  db.collection("daily_logs").doc(todayStr).set({ hydration: hydrationGlasses }, { merge: true });
+  spawnRipple(window.innerWidth/2, window.innerHeight/2);
+}
+
+function addMacros(c, p, cb, f) {
+  macros.c += c; macros.p += p; macros.cb += cb; macros.f += f;
+  db.collection("daily_logs").doc(todayStr).set({ macros: macros }, { merge: true });
+  spawnRipple(window.innerWidth/2, window.innerHeight/2);
+}
+
+function renderMacros() {
+  document.getElementById("nCal").textContent = macros.c;
+  document.getElementById("nProt").textContent = macros.p + "g";
+  document.getElementById("nCarb").textContent = macros.cb + "g";
+  document.getElementById("nFat").textContent = macros.f + "g";
+}
+
+function renderSavedMeals() {
+  const grid = document.getElementById("savedMealsGrid");
+  if(customMeals.length === 0) {
+    grid.innerHTML = '<div style="font-size:12px; color:var(--muted); text-align:center;">No meals saved yet. Build one below!</div>';
+    return;
+  }
+  grid.innerHTML = customMeals.map((m, idx) => `
+    <div style="display:flex; gap:5px; align-items:stretch;">
+      <button class="quick-add-btn" style="text-align:left; flex:1;" onclick="addMacros(${m.c}, ${m.p}, ${m.cb}, ${m.f})">
+        <div style="font-weight:bold;">${m.n}</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">${m.c} kcal | ${m.p}P ${m.cb}C ${m.f}F</div>
+      </button>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <button onclick="editCustomMeal(${idx})" style="flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:8px; cursor:pointer; color:var(--text); padding:0 10px; font-size:14px;">✏️</button>
+        <button onclick="deleteCustomMeal(${idx})" style="flex:1; background:var(--surface2); border:1px solid var(--accent-warn); border-radius:8px; cursor:pointer; color:var(--accent-warn); padding:0 10px; font-size:14px;">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function resetMacros() {
+  if(!confirm("Are you sure you want to reset today's macros?")) return;
+  macros = { c:0, p:0, cb:0, f:0 };
+  db.collection("daily_logs").doc(todayStr).set({ macros: macros }, { merge: true });
+}
+
+function deleteCustomMeal(idx) {
+  if(!confirm("Delete this saved meal?")) return;
+  customMeals.splice(idx, 1);
+  savePreferences();
+  renderSavedMeals();
+}
+
+function editCustomMeal(idx) {
+  const m = customMeals[idx];
+  document.getElementById("mName").value = m.n;
+  document.getElementById("mCal").value = m.c;
+  document.getElementById("mProt").value = m.p;
+  document.getElementById("mCarb").value = m.cb;
+  document.getElementById("mFat").value = m.f;
+  
+  // Remove from saved so they can re-save
+  customMeals.splice(idx, 1);
+  savePreferences();
+  renderSavedMeals();
+  document.getElementById("mName").focus();
+}
+
+function saveCustomMeal() {
+  const n = document.getElementById("mName").value || 'Custom Meal';
+  const c = parseInt(document.getElementById("mCal").value) || 0;
+  const p = parseInt(document.getElementById("mProt").value) || 0;
+  const cb = parseInt(document.getElementById("mCarb").value) || 0;
+  const f = parseInt(document.getElementById("mFat").value) || 0;
+  if(c === 0) return;
+
+  customMeals.push({n, c, p, cb, f});
+  savePreferences();
+  renderSavedMeals();
+
+  document.getElementById("mName").value = '';
+  document.getElementById("mCal").value = '';
+  document.getElementById("mProt").value = '';
+  document.getElementById("mCarb").value = '';
+  document.getElementById("mFat").value = '';
+}
+
+function addCustomFood() {
+  const c = parseInt(document.getElementById("mCal").value) || 0;
+  const p = parseInt(document.getElementById("mProt").value) || 0;
+  const cb = parseInt(document.getElementById("mCarb").value) || 0;
+  const f = parseInt(document.getElementById("mFat").value) || 0;
+  if(c === 0) return;
+  addMacros(c, p, cb, f);
+  
+  document.getElementById("mCal").value = '';
+  document.getElementById("mProt").value = '';
+  document.getElementById("mCarb").value = '';
+  document.getElementById("mFat").value = '';
+}
+
+// ==========================================
+// BARCODE SCANNER
+// ==========================================
+let html5QrcodeScanner = null;
+
+function toggleScanner() {
+  const reader = document.getElementById("reader");
+  const btn = document.getElementById("scanBtn");
+  
+  if (reader.style.display === "block") {
+    if(html5QrcodeScanner) html5QrcodeScanner.clear();
+    reader.style.display = "none";
+    btn.textContent = "Scan Barcode";
+  } else {
+    reader.style.display = "block";
+    btn.textContent = "Close Scanner";
+    
+    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }, false);
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+  }
+}
+
+function onScanSuccess(decodedText, decodedResult) {
+  toggleScanner();
+  const url = `https://world.openfoodfacts.org/api/v0/product/${decodedText}.json`;
+  
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if(data.status === 1) {
+        const p = data.product;
+        const name = p.product_name || "Unknown Product";
+        const nut = p.nutriments || {};
+        
+        const kcal = nut['energy-kcal_100g'] || 0;
+        const prot = nut.proteins_100g || 0;
+        const carb = nut.carbohydrates_100g || 0;
+        const fat = nut.fat_100g || 0;
+        
+        if (confirm(`Log 100g of ${name}?\n${kcal} kcal | ${prot}g Prot | ${carb}g Carb | ${fat}g Fat`)) {
+          addMacros(Math.round(kcal), Math.round(prot), Math.round(carb), Math.round(fat));
+        }
+      } else {
+        alert("Product not found in OpenFoodFacts database.");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error fetching product data.");
+    });
+}
+
+function onScanFailure(error) {
+  // Quiet failure for frame scanning
+}
+
+// ==========================================
+// TRENDS & FIRESTORE FETCH
+// ==========================================
+async function loadHistoricalTrends() {
+  const container = document.getElementById("trendsContainer");
+  container.innerHTML = "<div style='color:var(--muted); text-align:center;'>Loading data...</div>";
+  try {
+    const snapshot = await db.collection("daily_logs").orderBy("date", "desc").limit(30).get();
+    if(snapshot.empty) {
+      container.innerHTML = "<div style='color:var(--muted); text-align:center;'>No historical data found yet. Save a day to see trends!</div>";
+      return;
+    }
+    
+    let html = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const macros = data.macros || {c:0, p:0, cb:0, f:0};
+      
+      html += `
+        <div style="background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:1.2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div style="font-weight:bold; color:var(--rose); font-size:16px;">${data.date}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">Steps: ${data.steps} | Sleep: ${data.sleep}h | Hydration: ${data.hydration} glasses</div>
+          </div>
+          <div style="display:flex; gap:10px; font-family:monospace; font-size:13px;">
+            <div style="padding:4px 8px; background:rgba(0,0,0,0.4); border-radius:4px; border:1px solid var(--border2);">${macros.c} kcal</div>
+            <div style="padding:4px 8px; background:rgba(0,0,0,0.4); border-radius:4px; border:1px solid var(--border2); color:var(--accent-code)">${macros.p}g P</div>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  } catch(e) {
+    console.error("Error fetching trends", e);
+    container.innerHTML = "<div style='color:var(--accent-warn); text-align:center;'>Failed to load trends data. Check console.</div>";
+  }
+}
+
+// ==========================================
+// GEMINI AI OVERSEER & FIRESTORE SAVE
+// ==========================================
+function generateAIAnalysis() {
+  const box = document.getElementById("aiReportBox");
+  box.innerHTML = "<em>Analyzing all metrics securely via backend... Please wait...</em>";
+  
+  const dailyData = {
+    steps: document.getElementById("mSteps") ? document.getElementById("mSteps").textContent : "0",
+    sleep: document.getElementById("mSleep") ? document.getElementById("mSleep").textContent : "0",
+    hrv: document.getElementById("mHrv") ? document.getElementById("mHrv").textContent : "0",
+    cycle: document.getElementById("mCycle") ? document.getElementById("mCycle").textContent : "0",
+    cdsDays: cc_cds_done.length,
+    cdsStreak: calculateStreak(cc_cds_done),
+    cseDays: cc_cse_done.length,
+    cseStreak: calculateStreak(cc_cse_done),
+    nutrition: `${macros.c}c, ${macros.p}p, ${macros.cb}cb, ${macros.f}f`,
+    hydration: `${hydrationGlasses} glasses`
+  };
+
+  // 1. Save Day to Firestore
+  try {
+    db.collection("daily_logs").doc(todayStr).set({
+      timestamp: new Date().toISOString(),
+      macros: macros,
+      hydration: hydrationGlasses,
+      completedBlocks: completedBlocks,
+      gymToday: gymToday,
+      stats: dailyData
+    }, { merge: true });
+    console.log("Day saved to Firestore: " + todayStr);
+  } catch(e) {
+    console.error("Error saving day to Firestore", e);
+  }
+
+  // 2. Call Cloud Function
+  const analyzeWithGemini = functions.httpsCallable('analyzeWithGemini');
+  
+  analyzeWithGemini({
+    images: uploadedScreenshots,
+    stats: dailyData,
+    gymToday: gymToday
+  })
+  .then(result => {
+    box.innerHTML = `<strong>Coach's Verdict:</strong><br><br>${result.data.verdict.replace(/\\n/g, '<br>')}`;
+  })
+  .catch(err => {
+    console.error(err);
+    box.innerHTML = `<span style="color:var(--accent-warn)">Backend Error: ${err.message || 'Failed to fetch AI analysis.'}</span>`;
+  });
+}
+
+function handleScreenshots(event) {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+  
+  const container = document.getElementById("imagePreviewContainer");
+  container.innerHTML = "";
+  uploadedScreenshots = [];
+  
+  Array.from(files).slice(0, 4).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadedScreenshots.push(e.target.result);
+      const img = document.createElement("img");
+      img.src = e.target.result;
+      img.style.height = "60px";
+      img.style.borderRadius = "8px";
+      img.style.border = "1px solid var(--border)";
+      img.style.objectFit = "cover";
+      container.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ==========================================
+// TIMERS & HUAWEI PARSER
+// ==========================================
+function toggleTimer(id) {
+  let t = timers[id];
+  if(t.int) { clearInterval(t.int); t.int = null; } 
+  else {
+    t.int = setInterval(() => {
+      t.e++;
+      const h = Math.floor(t.e / 3600);
+      const m = Math.floor((t.e % 3600) / 60);
+      const s = t.e % 60;
+      document.getElementById(id === 'yt' ? 'displayYT' : 'displayApp').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+  }
+}
+
+function parseDataFile(e) {
+  const f = e.target.files[0];
+  if(!f) return;
+  // Simulating the parser reading Huawei CSV formats
+  setTimeout(() => {
+    document.getElementById("mSteps").textContent = "12,450";
+    document.getElementById("mSleep").textContent = "6.8";
+    document.getElementById("mHrv").textContent = "58";
+    document.getElementById("mCycle").textContent = "18.2";
+  }, 500);
+}
+
+// ==========================================
+// OVERLAY SYSTEM & RIPPLES
+// ==========================================
+function triggerOverlay(cls, title) {
+  const ov = document.getElementById("focusOverlay");
+  ['focus-default','focus-gf','focus-cds','focus-cse','focus-cycle','focus-gym'].forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  
+  const currentDay = Math.max(1, Math.ceil((new Date() - START_DATE)/86400000));
+  
+  if (cls === 'blk-gf') {
+    document.getElementById("focus-gf").style.display = 'block';
+    const timeElem = document.getElementById("fgfTime");
+    if(timeElem) timeElem.style.display = 'none';
+  } else if (cls === 'blk-cds') {
+    document.getElementById("focus-cds").style.display = 'block';
+    document.getElementById("fcdsTitle").textContent = "Today's CDS";
+    const timeElem = document.getElementById("fcdsTime");
+    if(timeElem) timeElem.style.display = 'none';
+    
+    // Inject day's data
+    const cdsDayObj = CDS.find(x => x.d === Math.min(CDS.length, currentDay)) || CDS[0];
+    const quote = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    const subElem = document.querySelector("#focus-cds .focus-sub");
+    if(subElem) subElem.innerHTML = `<div style="text-align:left; background:rgba(0,0,0,0.3); padding:1rem; border-radius:10px; border:1px solid var(--border);">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:5px;">PHASE ${cdsDayObj.ph} | WEEK ${cdsDayObj.wk} | DAY ${cdsDayObj.d}</div>
+      <div style="font-size:18px; color:var(--cream); font-weight:600; margin-bottom:8px;">${cdsDayObj.topic}</div>
+      <div style="font-size:14px; color:var(--text); line-height:1.4; margin-bottom:15px;">${cdsDayObj.detail}</div>
+      <div style="font-size:12px; color:var(--rose); font-style:italic;">"${quote}"</div>
+    </div>`;
+  } else if (cls === 'blk-cse') { // CSE
+    const fcse = document.getElementById("focus-cse");
+    if(fcse) fcse.style.display = 'block';
+    const titleEl = document.getElementById("fcseTitle");
+    if(titleEl) titleEl.textContent = "Today's CSE";
+    
+    const cseDayObj = CSE.find(x => x.d === Math.min(CSE.length, currentDay)) || CSE[0];
+    const quote = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    const subElem = document.getElementById("fcseSub");
+    if(subElem) subElem.innerHTML = `<div style="text-align:left; background:rgba(0,0,0,0.3); padding:1rem; border-radius:10px; border:1px solid var(--border);">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:5px;">PHASE ${cseDayObj.ph} | WEEK ${cseDayObj.wk} | DAY ${cseDayObj.d}</div>
+      <div style="font-size:18px; color:var(--cream); font-weight:600; margin-bottom:8px;">${cseDayObj.topic}</div>
+      <div style="font-size:14px; color:var(--text); line-height:1.4; margin-bottom:15px;">${cseDayObj.detail}</div>
+      <div style="font-size:12px; color:var(--accent-code); font-style:italic;">"${quote}"</div>
+    </div>`;
+  } else if (cls === 'blk-travel') {
+    document.getElementById("focus-cycle").style.display = 'block';
+    const timeElem = document.getElementById("fcycTime");
+    if(timeElem) timeElem.style.display = 'none';
+  } else if (cls === 'blk-gym') {
+    document.getElementById("focus-gym").style.display = 'block';
+    document.getElementById("fgymTitle").textContent = "Today's Split";
+    const timeElem = document.getElementById("fgymTime");
+    if(timeElem) timeElem.style.display = 'none';
+    
+    const dayStr = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
+    const g = GYM_SPLIT.find(x => x.d === dayStr) || GYM_SPLIT[0];
+    const quote = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    
+    const subElem = document.getElementById("fgymWarmup");
+    if(subElem) subElem.innerHTML = `<div style="text-align:left; background:rgba(0,0,0,0.3); padding:1rem; border-radius:10px; border:1px solid var(--border);">
+      <div style="font-size:18px; color:var(--cream); font-weight:600; margin-bottom:8px;">${g.t}</div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;"><strong>Warmup:</strong> ${g.w}</div>
+      <ul style="list-style:none; padding:0; margin:0 0 15px 0;">
+        ${g.ex.map(e => `<li style="padding:6px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; font-size:14px;"><span>${e.name}</span><span style="color:var(--muted2);">${e.sets}</span></li>`).join('')}
+      </ul>
+      <div style="font-size:12px; color:var(--rose); font-style:italic; text-align:center;">"${quote}"</div>
+    </div>`;
+  } else {
+    document.getElementById("focus-default").style.display = 'block';
+    document.getElementById("fdTitle").textContent = title;
+    const timeElem = document.getElementById("fdTime");
+    if(timeElem) timeElem.style.display = 'none';
+  }
+  
+  ov.classList.add("active");
+}
+
+function closeFocus() {
+  document.getElementById("focusOverlay").classList.remove("active");
+  spawnRipple(window.innerWidth/2, window.innerHeight/2);
+}
+
+function spawnRipple(x, y) {
+  const r = document.createElement("div"); r.className = "tap-ripple";
+  const size = Math.min(window.innerWidth, window.innerHeight) * 1.5;
+  r.style.cssText = `width:${size}px; height:${size}px; left:${x-size/2}px; top:${y-size/2}px;`;
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+}
+
+function showGymDropdown() {
+  const dd = document.getElementById("gExDropdown");
+  if(!dd) return;
+  dd.style.display = "block";
+  filterGymDropdown();
+}
+
+function filterGymDropdown() {
+  const dd = document.getElementById("gExDropdown");
+  if(!dd) return;
+  const gEx = document.getElementById("gEx");
+  if(!gEx) return;
+  const val = gEx.value.toLowerCase();
+  
+  const list = window.gymExercises || [];
+  const filtered = list.filter(e => typeof e === 'string' && e.toLowerCase().includes(val));
+  
+  if (filtered.length === 0) {
+    dd.innerHTML = `<div style="padding:10px; color:var(--muted2); font-size:12px;">No matches found</div>`;
+  } else {
+    dd.innerHTML = filtered.map(name => `
+      <div onclick="selectGymDropdown('${name.replace(/'/g, "\\'")}')" 
+           style="padding:10px 12px; cursor:pointer; font-size:13px; color:var(--text); border-bottom:1px solid rgba(255,180,200,0.05);"
+           onmouseover="this.style.background='var(--pink)'"
+           onmouseout="this.style.background='transparent'">
+        ${name}
+      </div>
+    `).join('');
+  }
+}
+
+function selectGymDropdown(name) {
+  document.getElementById("gEx").value = name;
+  document.getElementById("gExDropdown").style.display = "none";
+}
+
+document.addEventListener('click', function(e) {
+  const gEx = document.getElementById('gEx');
+  const dd = document.getElementById('gExDropdown');
+  if (gEx && dd) {
+    if (e.target !== gEx && !dd.contains(e.target)) {
+      dd.style.display = 'none';
+    }
+  }
+});
+
+init();
+</script>
+</body>
+</html>
