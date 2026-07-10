@@ -1313,12 +1313,18 @@ function onScanSuccess(decodedText, decodedResult) {
           addMacros(Math.round(kcal), Math.round(prot), Math.round(carb), Math.round(fat));
         }
       } else {
-        alert("Product not found in OpenFoodFacts database.");
+        if(confirm("Product not found. Would you like to log macros manually?")) {
+          switchTab('nutrition', document.querySelector('.nav-btn[onclick="switchTab(\\\'nutrition\\\',this)"]'));
+          document.getElementById('mName').focus();
+        }
       }
     })
     .catch(err => {
       console.error(err);
-      alert("Error fetching product data.");
+      if(confirm("Error fetching product data. Would you like to log macros manually?")) {
+        switchTab('nutrition', document.querySelector('.nav-btn[onclick="switchTab(\\\'nutrition\\\',this)"]'));
+        document.getElementById('mName').focus();
+      }
     });
 }
 
@@ -1365,12 +1371,78 @@ async function loadHistoricalTrends() {
 }
 
 // ==========================================
+// JOURNAL SYSTEM
+// ==========================================
+function saveJournal() {
+  const input = document.getElementById("journalInput");
+  const isBackdate = document.getElementById("journalBackdate") && document.getElementById("journalBackdate").checked;
+  const text = input.value.trim();
+  if(!text) {
+    alert("Please write something before saving.");
+    return;
+  }
+  
+  let entryDate = new Date();
+  if (isBackdate) {
+    entryDate.setDate(entryDate.getDate() - 1);
+    // Set time to around 10:00 PM for consistency with "last night"
+    entryDate.setHours(22, 0, 0, 0);
+  }
+  
+  let journals = JSON.parse(localStorage.getItem('cc_journals') || '[]');
+  journals.unshift({
+    date: entryDate.toLocaleString(),
+    text: text
+  });
+  
+  // Sort journals by date descending just in case backdating mixed up the order
+  journals.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  localStorage.setItem('cc_journals', JSON.stringify(journals));
+  input.value = "";
+  if (document.getElementById("journalBackdate")) {
+    document.getElementById("journalBackdate").checked = false;
+  }
+  renderJournals();
+  alert(isBackdate ? "Journal saved for yesterday night." : "Journal saved.");
+}
+
+function renderJournals() {
+  const container = document.getElementById("journalEntriesContainer");
+  if(!container) return;
+  
+  let journals = JSON.parse(localStorage.getItem('cc_journals') || '[]');
+  container.innerHTML = "";
+  
+  journals.forEach(j => {
+    let div = document.createElement('div');
+    div.className = "log-form-box";
+    div.style.padding = "1rem";
+    div.innerHTML = `
+      <div style="font-size:10px; color:var(--muted); margin-bottom:8px;">${j.date}</div>
+      <div style="font-size:13px; color:var(--text); line-height:1.5;">${j.text.replace(/\\n/g, '<br>')}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Call renderJournals on load
+window.addEventListener('DOMContentLoaded', () => {
+  if(document.getElementById('journalEntriesContainer')) {
+    renderJournals();
+  }
+});
+
+// ==========================================
 // GEMINI AI OVERSEER & FIRESTORE SAVE
 // ==========================================
 function generateAIAnalysis() {
   const box = document.getElementById("aiReportBox");
   box.innerHTML = "<em>Analyzing all metrics securely via backend... Please wait...</em>";
   
+  let recentJournals = JSON.parse(localStorage.getItem('cc_journals') || '[]');
+  let journalContext = recentJournals.length > 0 ? recentJournals[0].text : "No recent journal entries.";
+
   const dailyData = {
     steps: document.getElementById("mSteps") ? document.getElementById("mSteps").textContent : "0",
     sleep: document.getElementById("mSleep") ? document.getElementById("mSleep").textContent : "0",
@@ -1381,7 +1453,8 @@ function generateAIAnalysis() {
     cseDays: cc_cse_done.length,
     cseStreak: calculateStreak(cc_cse_done),
     nutrition: `${macros.c}c, ${macros.p}p, ${macros.cb}cb, ${macros.f}f`,
-    hydration: `${hydrationGlasses} glasses`
+    hydration: `${hydrationGlasses} glasses`,
+    journal: journalContext
   };
 
   // 1. Save Day to Firestore
