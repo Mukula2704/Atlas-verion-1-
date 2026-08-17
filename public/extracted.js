@@ -105,15 +105,33 @@ function buildGym() {
   const g = GYM_SPLIT.find(x => x.d === dayStr) || GYM_SPLIT[0];
   
   let exercisesHtml = g.ex.map((e, index) => {
+    // Exclude cardio from having weight inputs
+    if (e.name.toLowerCase().includes('cardio') || e.name.toLowerCase().includes('walk') || e.name.toLowerCase().includes('steps')) {
+      return `
+        <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; width:100%;">
+            <span style="font-weight:600; font-size:1.1rem; color:var(--green);">${e.name}</span>
+            <span class="ex-sets">${e.sets}</span>
+          </div>
+          <div style="font-size:12px; color:var(--muted2); margin-top:4px;"><i>↳ ${e.note}</i></div>
+        </li>
+      `;
+    }
+
     let hist = gymHistory[e.name] || [];
-    let lastWeight = "--";
     let targetWeight = "";
     let isScaleUp = false;
+    
+    // Extract default target from the note if history is empty
+    let match = e.note.match(/(\d+(?:\.\d+)?)kg/);
+    if (match) targetWeight = match[1];
 
+    let historyHtml = '<div style="font-size:11px; color:var(--muted); margin-bottom:8px;">No past logs.</div>';
+    
     if (hist.length > 0) {
-      lastWeight = hist[hist.length - 1].weight;
-      targetWeight = lastWeight;
-
+      targetWeight = hist[hist.length - 1].weight;
+      
+      // Auto scale logic
       if (hist.length >= 2) {
         let last1 = hist[hist.length - 1].weight;
         let last2 = hist[hist.length - 2].weight;
@@ -123,26 +141,30 @@ function buildGym() {
           targetWeight = Number(last1) + inc;
         }
       }
-    } else {
-      let match = e.note.match(/(\d+(?:\.\d+)?)kg/);
-      if (match) targetWeight = match[1];
+      
+      // Show up to past 3 logs
+      let pastLogs = hist.slice(-3).reverse();
+      historyHtml = `<div style="font-size:11px; color:var(--muted); margin-bottom:8px;">
+        <strong>Past Logs:</strong><br>
+        ${pastLogs.map(h => `• ${h.weight}kg x ${h.reps} reps (${h.sets} sets)`).join('<br>')}
+      </div>`;
     }
 
     return `
-      <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:10px;">
+      <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:15px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:15px;">
         <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:4px;">
           <span style="font-weight:600; font-size:1.1rem;">${e.name}</span>
           <span class="ex-sets" style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px;">${e.sets}</span>
         </div>
-        ${e.note ? `<div style="font-size:12px; color:var(--muted2); line-height:1.4; margin-bottom:10px;"><i>↳ ${e.note}</i></div>` : ''}
+        ${e.note ? `<div style="font-size:12px; color:var(--muted2); line-height:1.4; margin-bottom:8px;"><i>↳ ${e.note}</i></div>` : ''}
         
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; background:var(--surface2); padding:10px; border-radius:8px;">
-          <div style="font-size:12px; color:var(--muted);">
-            Last: <strong style="color:var(--text);">${lastWeight !== "--" ? lastWeight + ' kg' : 'None'}</strong>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            ${isScaleUp ? `<span style="font-size:11px; background:var(--rose); color:#000; padding:2px 6px; border-radius:4px; font-weight:bold;">🔥 Scale Up</span>` : ''}
-            <input type="number" step="0.5" id="gymInput_${index}" data-name="${e.name}" value="${targetWeight}" class="log-input" style="width:70px; text-align:center; padding:4px;" placeholder="kg">
+        <div style="width:100%; background:var(--surface2); padding:10px; border-radius:8px;">
+          ${historyHtml}
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            ${isScaleUp ? `<span style="font-size:11px; background:var(--rose); color:#000; padding:4px 6px; border-radius:4px; font-weight:bold;">🔥 Scale Up</span>` : ''}
+            <input type="number" step="0.5" id="gWt_${index}" data-name="${e.name}" value="${targetWeight}" class="log-input" style="width:65px; text-align:center; padding:6px;" placeholder="kg">
+            <input type="number" id="gRp_${index}" class="log-input" style="width:65px; text-align:center; padding:6px;" placeholder="Reps">
+            <input type="number" id="gSt_${index}" class="log-input" style="width:65px; text-align:center; padding:6px;" placeholder="Sets">
           </div>
         </div>
       </li>
@@ -195,17 +217,30 @@ function switchGymView(view, btn) {
 }
 
 function saveTodayWorkout() {
-  const inputs = document.querySelectorAll('#gymGrid input[type="number"]');
+  const inputsWeight = document.querySelectorAll('input[id^="gWt_"]');
   let hasData = false;
   
-  inputs.forEach(input => {
-    let wt = parseFloat(input.value);
-    let name = input.getAttribute('data-name');
+  inputsWeight.forEach(wtInput => {
+    let index = wtInput.id.split('_')[1];
+    let rpInput = document.getElementById(`gRp_${index}`);
+    let stInput = document.getElementById(`gSt_${index}`);
     
-    if (!isNaN(wt) && wt > 0) {
+    let wt = parseFloat(wtInput.value);
+    let rp = parseInt(rpInput.value) || 0;
+    let st = parseInt(stInput.value) || 0;
+    let name = wtInput.getAttribute('data-name');
+    
+    if (!isNaN(wt) && wt > 0 && rp > 0 && st > 0) {
       hasData = true;
       if (!gymHistory[name]) gymHistory[name] = [];
-      gymHistory[name].push({ date: new Date().toISOString(), weight: wt });
+      
+      // Store weight, reps, sets, and date
+      gymHistory[name].push({ 
+        date: new Date().toISOString(), 
+        weight: wt,
+        reps: rp,
+        sets: st
+      });
     }
   });
 
@@ -216,7 +251,9 @@ function saveTodayWorkout() {
       msg.style.display = 'block';
       setTimeout(() => msg.style.display = 'none', 3000);
     }
-    buildGym();
+    buildGym(); // Refresh to show new logs
+  } else {
+    alert("Please fill out Weight, Reps, and Sets for at least one exercise to save.");
   }
 }
 
