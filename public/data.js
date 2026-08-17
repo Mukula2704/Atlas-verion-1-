@@ -86,34 +86,34 @@ const SCHEDULE = [
     "cls": "blk-gym"
   },
   {
-    "icon": "🚴",
-    "title": "Cycle",
-    "cls": "blk-travel"
-  },
-  {
-    "icon": "📖",
-    "title": "CDS",
-    "cls": "blk-cds"
+    "icon": "💼",
+    "title": "Job Hunt",
+    "cls": "blk-career"
   },
   {
     "icon": "💻",
-    "title": "CSE",
+    "title": "App Dev",
     "cls": "blk-cse"
   },
   {
-    "icon": "💰",
-    "title": "Income",
-    "cls": "blk-yt"
+    "icon": "🚀",
+    "title": "Freelance",
+    "cls": "blk-freelance"
+  },
+  {
+    "icon": "🥗",
+    "title": "Nutrition",
+    "cls": "blk-nutrition"
+  },
+  {
+    "icon": "📖",
+    "title": "CDS Prep",
+    "cls": "blk-cds"
   },
   {
     "icon": "📝",
-    "title": "Vocab",
-    "cls": "blk-vocab"
-  },
-  {
-    "icon": "📰",
-    "title": "Headlines",
-    "cls": "blk-news"
+    "title": "Journal",
+    "cls": "blk-journal"
   },
   {
     "icon": "💗",
@@ -124,74 +124,73 @@ const SCHEDULE = [
 
 const GYM_SPLIT = [
   {
-    d: "Mon", t: "Push (Upper Chest & 3D Shoulders)", c: "gcard-push", 
-    w: "Arm circles (2min), Band pull-aparts (3x20), Light DB presses (2x15)", 
+    d: "Mon", t: "Heavy Push (Chest, Shoulders, Triceps)", c: "gcard-push", 
+    w: "Dynamic chest stretches, Light band presses", 
     ex: [
-      { name: "Incline DB Press", sets: "4x8-10", note: "Heavy, deep stretch. Main chest builder." },
-      { name: "Low-to-High Cable Crossovers", sets: "3x12", note: "Upper chest isolation." },
-      { name: "Seated DB Shoulder Press", sets: "4x8-10", note: "Heavy presses for caps." },
-      { name: "DB Lateral Raises", sets: "4x12-15", note: "Last set is a drop set to failure." },
-      { name: "Weighted Cable Crunches", sets: "4x15", note: "Heavy weight for popping 6-pack blocks." }
+      { name: "Machine Chest Press", sets: "3x6-8", note: "Heavy load, 55-60kg." },
+      { name: "Incline DB Press", sets: "3x8-10", note: "25kg+ per hand." },
+      { name: "DB Lateral Raises", sets: "3x12", note: "10-12.5kg per hand." },
+      { name: "Tricep Cable Pushdowns", sets: "3x12", note: "60kg, squeeze at the bottom." },
+      { name: "Incline Walk (Cardio)", sets: "15 Min", note: "130 bpm heart rate." }
     ]
   },
   {
-    d: "Tue", t: "Pull (Demon Back & Forearms)", c: "gcard-pull", 
-    w: "Dead hangs (2x30s), Scapular pull-ups (2x10), Dynamic twists", 
+    d: "Tue", t: "Heavy Pull (Back, Biceps, Wrists)", c: "gcard-pull", 
+    w: "Dead hangs (2x30s), Light lat pulldowns", 
     ex: [
-      { name: "Weighted Pull-ups (or Wide Pulldown)", sets: "4x8-10", note: "Focus on lat width and stretch." },
-      { name: "Chest-Supported T-Bar/DB Row", sets: "4x8-10", note: "Upper back thickness & separation." },
-      { name: "Straight Arm Cable Pullovers", sets: "3x12", note: "Lat isolation, squeeze at the bottom." },
-      { name: "EZ Bar Reverse Curls", sets: "3x10-12", note: "Top of the forearm/brachioradialis." },
-      { name: "DB Hammer Curls", sets: "3x10", note: "Thick forearms." }
+      { name: "Lat Pulldown", sets: "3x8-10", note: "Heavy, 60-65kg." },
+      { name: "Seated Cable Row", sets: "3x10", note: "60kg, pull to belly button." },
+      { name: "Hammer Curls", sets: "3x10", note: "Wrist safe! 12.5-15kg per hand." },
+      { name: "Dead Hangs", sets: "3xMax Time", note: "Tendon strength and grip." },
+      { name: "Incline Walk (Cardio)", sets: "15 Min", note: "Keep moving to burn fat." }
     ]
   },
   {
-    d: "Wed", t: "Legs (Shredded Quads & Obliques)", c: "gcard-legs", 
-    w: "Bodyweight squats (2x20), Hip openers, Leg swings", 
+    d: "Wed", t: "Heavy Legs & Core", c: "gcard-legs", 
+    w: "Bodyweight squats, hip openers", 
     ex: [
-      { name: "Bulgarian Split Squats", sets: "4x8-10", note: "Tear drop quads. Replaces Leg Press." },
-      { name: "Romanian Deadlifts (RDLs)", sets: "4x8-10", note: "Hamstring sweep and glutes." },
-      { name: "Leg Extensions", sets: "3x12-15", note: "Quad isolation and burn." },
-      { name: "Standing Calf Raises", sets: "4x15", note: "Full stretch at the bottom." },
-      { name: "Cable Woodchoppers", sets: "3x12/side", note: "For that V-cut and oblique definition." }
+      { name: "45-Degree Hack Squat", sets: "3x6-8", note: "70-80kg, deep stretch." },
+      { name: "Barbell Hip Thrusts", sets: "3x10", note: "50-60kg." },
+      { name: "Lying Leg Curls", sets: "3x10", note: "20kg, squeeze hamstrings." },
+      { name: "Weighted Cable Crunches", sets: "3x15", note: "Heavy weight for core blocks." },
+      { name: "Incline Walk (Cardio)", sets: "15 Min", note: "Flush the legs." }
     ]
   },
   {
-    d: "Thu", t: "Shoulders (Cbum Focus) & Arms", c: "gcard-push", 
-    w: "Rotator cuff work, Band dislocations (2x15)", 
+    d: "Thu", t: "Upper Body (Metabolic Supersets)", c: "gcard-push", 
+    w: "Rotator cuff work, band dislocations", 
     ex: [
-      { name: "Smith Machine Overhead Press", sets: "4x8-10", note: "Pure isolation, no stability limits." },
-      { name: "Cable Lateral Raises", sets: "4x12-15", note: "Constant tension for round caps." },
-      { name: "Reverse Pec Deck", sets: "4x15", note: "Rear delts complete the 3D look." },
-      { name: "Incline DB Bicep Curls", sets: "3x10-12", note: "Huge stretch for the bicep peak." },
-      { name: "Rope Tricep Pushdowns", sets: "3x12-15", note: "Lock out and squeeze." }
+      { name: "Superset: Flat DB Press & Lat Pulldown", sets: "3x10", note: "25kg DBs / 55kg Pulldown. No rest between." },
+      { name: "Superset: Lateral Raises & EZ-Bar Curls", sets: "3x12", note: "10kg DBs / 20kg EZ-Bar." },
+      { name: "Tricep Overhead Cable Extensions", sets: "3x12", note: "Burnout the triceps." },
+      { name: "Incline Walk (Cardio)", sets: "15 Min", note: "Sweat it out." }
     ]
   },
   {
-    d: "Fri", t: "Back & Chest (Antagonistic Pump)", c: "gcard-pull", 
-    w: "Dynamic chest stretches, Light band rows", 
+    d: "Fri", t: "Lower Body (Metabolic) & Tendons", c: "gcard-legs", 
+    w: "Dynamic leg swings, empty hack squat", 
     ex: [
-      { name: "Superset: Incline Smith Press", sets: "3x10", note: "Superset with Lat Pulldowns. Crazy pump." },
-      { name: "Superset: Neutral Lat Pulldown", sets: "3x10", note: "No rest from the presses." },
-      { name: "Dips", sets: "3xFail", note: "Lower/outer chest definition." },
-      { name: "Face Pulls", sets: "3x15", note: "Rear delts and traps." },
-      { name: "Hanging Leg Raises", sets: "4x15", note: "Strict form, lower abs." }
+      { name: "Hack Squat", sets: "3x10-12", note: "60kg, higher reps for metabolic burn." },
+      { name: "Leg Extensions", sets: "3x15", note: "25-30kg, constant tension." },
+      { name: "Farmer's Walks", sets: "3x60 sec", note: "Grab heavy DBs, walk. Builds grip & core." },
+      { name: "EZ-Bar Reverse Curls", sets: "3x15", note: "Palms down. Protects the wrist joint." },
+      { name: "Incline Walk (Cardio)", sets: "15 Min", note: "Final cardio of the week." }
     ]
   },
   {
-    d: "Sat", t: "Arm Annihilation & Grip", c: "gcard-push", 
-    w: "Wrist rolls, Light curl warmups", 
+    d: "Sat", t: "Active Fat Burn", c: "gcard-pull", 
+    w: "Stretching and mobility", 
     ex: [
-      { name: "Barbell Curls", sets: "3x10", note: "Heavy, controlled negatives." },
-      { name: "Skull Crushers", sets: "3x10", note: "Elbows tucked." },
-      { name: "Farmer's Walks", sets: "3xMax", note: "Destroys forearms, traps, and core." },
-      { name: "Lying Leg Curls", sets: "3x12-15", note: "Extra hamstring volume." }
+      { name: "Steady State Cardio", sets: "30-45 Min", note: "Cycle or Treadmill. Zone 2." },
+      { name: "Core Work (Optional)", sets: "3xFail", note: "Planks or leg raises." }
     ]
   },
   {
-    d: "Sun", t: "Full Rest / Active Recovery", c: "gcard-legs", 
-    w: "Active recovery walk, Mobility drills, Foam rolling", 
-    ex: []
+    d: "Sun", t: "Full Rest", c: "gcard-legs", 
+    w: "Relax and recover", 
+    ex: [
+      { name: "10,000 Steps", sets: "Daily Goal", note: "Keep non-exercise activity high." }
+    ]
   }
 ];
 

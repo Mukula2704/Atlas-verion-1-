@@ -32,6 +32,32 @@ function init() {
   buildGym();
   buildCurriculums(Math.max(1, Math.ceil((now - START_DATE)/86400000)));
   renderSavedMeals();
+  
+  // Initialize CDS Toggle State
+  const cdsToggleState = localStorage.getItem('cc_cds_active') === 'true';
+  const cdsToggle = document.getElementById('cdsToggle');
+  if (cdsToggle) {
+    cdsToggle.checked = cdsToggleState;
+    toggleCdsView();
+  }
+}
+
+function toggleCdsView() {
+  const toggle = document.getElementById('cdsToggle');
+  const onState = document.getElementById('cdsOnState');
+  const offState = document.getElementById('cdsOffState');
+  
+  if (!toggle || !onState || !offState) return;
+  
+  if (toggle.checked) {
+    onState.style.display = 'block';
+    offState.style.display = 'none';
+    localStorage.setItem('cc_cds_active', 'true');
+  } else {
+    onState.style.display = 'none';
+    offState.style.display = 'block';
+    localStorage.setItem('cc_cds_active', 'false');
+  }
 }
 
 // ==========================================
@@ -72,42 +98,69 @@ function updateDayProgress() {
   document.getElementById('dpbFill').style.width = `${pct}%`;
 }
 
+let gymHistory = JSON.parse(localStorage.getItem('cc_gym_history')) || {};
+
 function buildGym() {
   const dayStr = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
   const g = GYM_SPLIT.find(x => x.d === dayStr) || GYM_SPLIT[0];
   
+  let exercisesHtml = g.ex.map((e, index) => {
+    let hist = gymHistory[e.name] || [];
+    let lastWeight = "--";
+    let targetWeight = "";
+    let isScaleUp = false;
+
+    if (hist.length > 0) {
+      lastWeight = hist[hist.length - 1].weight;
+      targetWeight = lastWeight;
+
+      if (hist.length >= 2) {
+        let last1 = hist[hist.length - 1].weight;
+        let last2 = hist[hist.length - 2].weight;
+        if (last1 === last2 && last1 > 0) {
+          isScaleUp = true;
+          let inc = (g.c === 'gcard-legs') ? 5 : 2.5;
+          targetWeight = Number(last1) + inc;
+        }
+      }
+    } else {
+      let match = e.note.match(/(\d+(?:\.\d+)?)kg/);
+      if (match) targetWeight = match[1];
+    }
+
+    return `
+      <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:4px;">
+          <span style="font-weight:600; font-size:1.1rem;">${e.name}</span>
+          <span class="ex-sets" style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px;">${e.sets}</span>
+        </div>
+        ${e.note ? `<div style="font-size:12px; color:var(--muted2); line-height:1.4; margin-bottom:10px;"><i>↳ ${e.note}</i></div>` : ''}
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; background:var(--surface2); padding:10px; border-radius:8px;">
+          <div style="font-size:12px; color:var(--muted);">
+            Last: <strong style="color:var(--text);">${lastWeight !== "--" ? lastWeight + ' kg' : 'None'}</strong>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${isScaleUp ? `<span style="font-size:11px; background:var(--rose); color:#000; padding:2px 6px; border-radius:4px; font-weight:bold;">🔥 Scale Up</span>` : ''}
+            <input type="number" step="0.5" id="gymInput_${index}" data-name="${e.name}" value="${targetWeight}" class="log-input" style="width:70px; text-align:center; padding:4px;" placeholder="kg">
+          </div>
+        </div>
+      </li>
+    `;
+  }).join('');
+
   const todayHtml = `
     <div class="gym-card ${g.c}">
       <div class="gym-day">${g.d}</div>
       <div class="gym-type">${g.t}</div>
-      <div class="gym-warmup"><strong>Optimal Warmup:</strong> ${g.w}</div>
-      <ul class="ex-list">
-        ${g.ex.map(e => `
-          <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:10px;">
-            <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:4px;">
-              <span style="font-weight:600;">${e.name}</span>
-              <span class="ex-sets">${e.sets}</span>
-            </div>
-            ${e.note ? `<div style="font-size:11px; color:var(--muted2); line-height:1.4;"><i>↳ ${e.note}</i></div>` : ''}
-          </li>
-        `).join('')}
+      <div class="gym-warmup"><strong>Warmup:</strong> ${g.w}</div>
+      <ul class="ex-list" style="margin-top:15px;">
+        ${exercisesHtml}
       </ul>
     </div>`;
+    
   const grid = document.getElementById("gymGrid");
   if(grid) grid.innerHTML = todayHtml;
-
-  const gEx = document.getElementById("gEx");
-  if(gEx && gEx.tagName === 'SELECT') {
-    let allEx = [];
-    if (typeof GYM_SPLIT !== 'undefined') {
-      GYM_SPLIT.forEach(split => {
-        split.ex.forEach(e => allEx.push(e.name));
-      });
-      allEx = [...new Set(allEx)];
-      gEx.innerHTML = '<option value="" disabled selected>Exercise</option>' + 
-                      allEx.map(name => `<option value="${name}">${name}</option>`).join('');
-    }
-  }
 
   const fullHtml = GYM_SPLIT.map(split => `
     <div class="gym-card ${split.c} ${split.d === dayStr ? 'active' : ''}">
@@ -140,14 +193,31 @@ function switchGymView(view, btn) {
     document.getElementById('gymFullWeekView').style.display = 'block';
   }
 }
-function addGymRecord() {
-  const ex = document.getElementById("gEx").value;
-  const wt = document.getElementById("gWt").value;
-  const rp = document.getElementById("gRep").value;
-  const st = document.getElementById("gSet").value;
-  if(!ex || !wt) return;
-  document.getElementById("gymTableBody").innerHTML += `<tr><td>${ex}</td><td>${wt}kg</td><td>${rp}</td><td>${st}</td></tr>`;
-  document.getElementById("gEx").value = '';
+
+function saveTodayWorkout() {
+  const inputs = document.querySelectorAll('#gymGrid input[type="number"]');
+  let hasData = false;
+  
+  inputs.forEach(input => {
+    let wt = parseFloat(input.value);
+    let name = input.getAttribute('data-name');
+    
+    if (!isNaN(wt) && wt > 0) {
+      hasData = true;
+      if (!gymHistory[name]) gymHistory[name] = [];
+      gymHistory[name].push({ date: new Date().toISOString(), weight: wt });
+    }
+  });
+
+  if (hasData) {
+    localStorage.setItem('cc_gym_history', JSON.stringify(gymHistory));
+    const msg = document.getElementById('gymSaveMsg');
+    if (msg) {
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+    buildGym();
+  }
 }
 
 let cc_cds_done = JSON.parse(localStorage.getItem('cc_cds_done')) || [];
@@ -281,11 +351,10 @@ function updateDayProgressClock() {
   
   let currentActivity = "Sleep";
   if(hrs >= 6 && hrs < 7) currentActivity = "Gym Session";
-  else if(hrs >= 7 && hrs < 8) currentActivity = "Cycle Transit";
-  else if(hrs >= 8 && hrs < 15) currentActivity = "Deep Work / Income";
-  else if(hrs >= 15 && hrs < 18) currentActivity = "CDS Study Protocol";
-  else if(hrs >= 18 && hrs < 21) currentActivity = "Presence Block (Indu)";
-  else if(hrs >= 21 && hrs < 22) currentActivity = "CSE Protocol & Wind down";
+  else if(hrs >= 7 && hrs < 8) currentActivity = "Morning Routine";
+  else if(hrs >= 8 && hrs < 17) currentActivity = "Deep Work / Career";
+  else if(hrs >= 17 && hrs < 21) currentActivity = "App Dev / Skill Building";
+  else if(hrs >= 21 && hrs < 22) currentActivity = "Wind down & Journal";
   
   const nowEl = document.getElementById("remDayNow");
   if(nowEl) nowEl.textContent = currentActivity;
