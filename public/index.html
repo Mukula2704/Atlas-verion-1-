@@ -861,46 +861,71 @@ function buildGym() {
   const dayStr = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
   const g = GYM_SPLIT.find(x => x.d === dayStr) || GYM_SPLIT[0];
   
+  let history = JSON.parse(localStorage.getItem('cc_gym_history') || '{}');
+  
   const todayHtml = `
     <div class="gym-card ${g.c}">
       <div class="gym-day">${g.d}</div>
       <div class="gym-type">${g.t}</div>
       <div class="gym-warmup"><strong>Optimal Warmup:</strong> ${g.w}</div>
       <ul class="ex-list">
-        ${g.ex.map(e => `
-          <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:10px;">
+        ${g.ex.map((e, idx) => {
+          let pastLogs = history[e.name] || [];
+          let recentLogText = pastLogs.length > 0 
+            ? pastLogs.slice(0, 3).map(l => `<div style="font-size:12px; margin-bottom:2px;"><span style="color:var(--muted2);">${new Date(l.date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}:</span> <span style="color:var(--cream);">${l.wt}kg x ${l.rp} reps</span> <span style="color:var(--muted); font-size:10px;">(${l.st} sets)</span></div>`).join('') 
+            : '<div style="color:var(--muted); font-style:italic;">No past logs</div>';
+          
+          let lastWt = pastLogs.length > 0 ? pastLogs[0].wt : '';
+          
+          // Auto-scale recommendation logic
+          let recommendation = "";
+          if(pastLogs.length >= 2) {
+             if(pastLogs[0].wt === pastLogs[1].wt && pastLogs[0].wt > 0) {
+                 recommendation = `<div style="color:var(--green); font-size:12px; margin-top:6px; font-weight:bold; padding:4px 8px; background:rgba(0,255,100,0.1); border-radius:4px; border:1px solid rgba(0,255,100,0.3);">🔥 You hit ${pastLogs[0].wt}kg for 2 weeks straight. Time to scale up!</div>`;
+             }
+          }
+          
+          let isCardio = e.name.toLowerCase().includes('walk') || e.name.toLowerCase().includes('cardio');
+          
+          return `
+          <li class="ex-item" style="flex-direction:column; align-items:flex-start; margin-bottom:20px; border-bottom: 1px solid rgba(255,180,200,0.05); padding-bottom:15px;">
             <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:4px;">
-              <span style="font-weight:600;">${e.name}</span>
+              <span style="font-weight:600; font-size:15px;">${e.name}</span>
               <span class="ex-sets">${e.sets}</span>
             </div>
-            ${e.note ? `<div style="font-size:11px; color:var(--muted2); line-height:1.4;"><i>↳ ${e.note}</i></div>` : ''}
+            ${e.note ? `<div style="font-size:11px; color:var(--muted2); line-height:1.4; margin-bottom:12px;"><i>↳ ${e.note}</i></div>` : '<div style="margin-bottom:12px;"></div>'}
+            
+            <!-- Past Logs Display -->
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; width:100%; margin-bottom:12px;">
+              <div style="font-weight:bold; margin-bottom:8px; color:var(--text); font-size:12px; text-transform:uppercase; letter-spacing:1px;">History:</div>
+              ${recentLogText}
+              ${recommendation}
+            </div>
+
+            <!-- Input Fields -->
+            <div style="display:flex; gap:10px; width:100%;">
+              <input type="hidden" id="exName_${idx}" value="${e.name}">
+              <div style="flex:1;">
+                 <label style="font-size:10px; color:var(--muted); text-transform:uppercase; font-weight:600; display:block; margin-bottom:4px;">Wt (kg)</label>
+                 <input type="number" id="exWt_${idx}" class="log-input" style="width:100%; padding:10px;" value="${lastWt}" ${isCardio ? 'disabled placeholder="-"' : 'placeholder="e.g. 60"'}>
+              </div>
+              <div style="flex:1;">
+                 <label style="font-size:10px; color:var(--muted); text-transform:uppercase; font-weight:600; display:block; margin-bottom:4px;">Reps</label>
+                 <input type="text" id="exRp_${idx}" class="log-input" style="width:100%; padding:10px;" placeholder="e.g. 8,8,6">
+              </div>
+              <div style="flex:1;">
+                 <label style="font-size:10px; color:var(--muted); text-transform:uppercase; font-weight:600; display:block; margin-bottom:4px;">Sets</label>
+                 <input type="number" id="exSt_${idx}" class="log-input" style="width:100%; padding:10px;" placeholder="Total">
+              </div>
+            </div>
           </li>
-        `).join('')}
+        `}).join('')}
       </ul>
     </div>`;
   const grid = document.getElementById("gymGrid");
   if(grid) grid.innerHTML = todayHtml;
 
-  const COMMON_EXERCISES = [
-    "Bench Press", "Incline DB Press", "Decline Bench Press", "Dumbbell Bench Press", "Chest Press", "Chest Flyes", "Cable Flyes", "Pec Deck Flyes", "Push-ups", "Dips",
-    "Squat", "Leg Press", "Lunges", "Leg Extensions", "Leg Curls", "Calf Raises", "Romanian Deadlift", "Bulgarian Split Squat",
-    "Deadlift", "Pull-ups", "Lat Pulldown", "Barbell Row", "Dumbbell Row", "Seated Cable Row", "T-Bar Row", "Straight Arm Pulldown",
-    "Overhead Press", "Lateral Raises", "Front Raises", "Reverse Pec Deck", "Face Pulls", "Upright Row",
-    "Barbell Curls", "Dumbbell Curls", "Hammer Curls", "Preacher Curls", "Concentration Curls", "Cable Curls",
-    "Tricep Pushdown", "Skull Crushers", "Overhead Tricep Extension", "Tricep Kickbacks", "Close-Grip Bench Press",
-    "Crunches", "Plank", "Leg Raises", "Russian Twists", "Ab Wheel Rollout", "Cable Crunches"
-  ];
-  
-  let allEx = [...COMMON_EXERCISES];
-  if (typeof GYM_SPLIT !== 'undefined') {
-    GYM_SPLIT.forEach(split => {
-      split.ex.forEach(e => allEx.push(e.name));
-    });
-  }
-  
-  const uniqueEx = [...new Set(allEx)].sort();
-  window.gymExercises = uniqueEx;
-
+  // Render Full Week View
   const fullHtml = GYM_SPLIT.map(split => `
     <div class="gym-card ${split.c} ${split.d === dayStr ? 'active' : ''}">
       <div class="gym-day">${split.d}</div>
@@ -933,49 +958,54 @@ function switchGymView(view, btn) {
   }
 }
 
-
-function renderGymTable() {
-  const tbody = document.getElementById("gymTableBody");
-  if (!tbody) return;
-  tbody.innerHTML = gymToday.map((g, idx) => `
-    <tr>
-      <td>${g.ex}</td>
-      <td>${g.wt}kg</td>
-      <td>${g.rp}</td>
-      <td>${g.st}</td>
-      <td style="text-align:center;">
-        <button onclick="editGymRecord(${idx})" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:14px; margin-right:5px;">✏️</button>
-        <button onclick="deleteGymRecord(${idx})" style="background:none; border:none; color:var(--accent-warn); cursor:pointer; font-size:14px;">🗑️</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function deleteGymRecord(idx) {
-  if(!confirm("Delete this set?")) return;
-  gymToday.splice(idx, 1);
-  db.collection("daily_logs").doc(todayStr).set({ gymToday: gymToday }, { merge: true });
-}
-
-function editGymRecord(idx) {
-  const r = gymToday[idx];
-  document.getElementById("gEx").value = r.ex;
-  document.getElementById("gWt").value = r.wt;
-  document.getElementById("gRep").value = r.rp;
-  document.getElementById("gSet").value = r.st;
-  gymToday.splice(idx, 1);
-  db.collection("daily_logs").doc(todayStr).set({ gymToday: gymToday }, { merge: true });
-}
-
-function addGymRecord() {
-  const ex = document.getElementById("gEx").value;
-  const wt = document.getElementById("gWt").value;
-  const rp = document.getElementById("gRep").value;
-  const st = document.getElementById("gSet").value;
-  if(!ex || !wt) return;
-  gymToday.push({ ex, wt, rp, st });
-  db.collection("daily_logs").doc(todayStr).set({ gymToday: gymToday }, { merge: true });
-  document.getElementById("gEx").value = '';
+function saveTodayWorkout() {
+  const dayStr = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
+  const g = GYM_SPLIT.find(x => x.d === dayStr);
+  if(!g) return;
+  
+  let history = JSON.parse(localStorage.getItem('cc_gym_history') || '{}');
+  let todayLog = [];
+  
+  for(let i=0; i<g.ex.length; i++) {
+     const nameEl = document.getElementById(`exName_${i}`);
+     if(!nameEl) continue;
+     const name = nameEl.value;
+     const wt = document.getElementById(`exWt_${i}`).value;
+     const rp = document.getElementById(`exRp_${i}`).value;
+     const st = document.getElementById(`exSt_${i}`).value;
+     
+     let isCardio = name.toLowerCase().includes('walk') || name.toLowerCase().includes('cardio');
+     
+     if((wt || isCardio) && rp && st) {
+        if(!history[name]) history[name] = [];
+        history[name].unshift({
+           date: new Date().toISOString(),
+           wt: isCardio ? 0 : parseFloat(wt),
+           rp: rp,
+           st: parseInt(st)
+        });
+        todayLog.push({ ex: name, wt: isCardio ? 0 : parseFloat(wt), rp, st });
+     }
+  }
+  
+  if(todayLog.length === 0) {
+    alert("Please fill out Weight, Reps, and Sets for at least one exercise.");
+    return;
+  }
+  
+  localStorage.setItem('cc_gym_history', JSON.stringify(history));
+  
+  // Save to daily firestore log
+  db.collection("daily_logs").doc(todayStr).set({ gymToday: todayLog }, { merge: true });
+  
+  const msg = document.getElementById('gymSaveMsg');
+  if(msg) {
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+  }
+  
+  // Re-render to show updated history immediately
+  buildGym();
 }
 
 // Globals are handled by initCloudSync()
