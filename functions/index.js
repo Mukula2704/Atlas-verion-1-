@@ -59,3 +59,37 @@ Manual Data Logs:
     throw new HttpsError("internal", err.message || "An error occurred while generating the analysis.");
   }
 });
+
+exports.cseTutor = onCall({ secrets: [geminiApiKey] }, async (request) => {
+  try {
+    const data = request.data;
+    if (!data || !data.topic) {
+      throw new HttpsError("invalid-argument", "Missing topic.");
+    }
+
+    const key = geminiApiKey.value();
+    if (!key) throw new HttpsError("failed-precondition", "API key missing.");
+
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(key);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const prompt = `You are an expert, interactive Software Engineering Tutor.
+The user is learning about: ${data.topic}
+Context/Details: ${data.detail || "None"}
+
+The user says: "${data.userPrompt || 'Teach me this topic.'}"
+
+Previous conversation history:
+${data.history || "None"}
+
+Provide a helpful, structured, and highly interactive response. Break down complex topics into simple terms. End your response by asking the user a question to check their understanding or to prompt the next step. Keep the response concise but highly educational.`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    return { text: text };
+  } catch (err) {
+    logger.error("Tutor Error", err);
+    throw new HttpsError("internal", err.message || "An error occurred.");
+  }
+});

@@ -650,6 +650,23 @@
     <div class="sec-head">Recent Entries</div>
     <div id="journalEntriesContainer" style="display:flex; flex-direction:column; gap:15px;"></div>
   </div>
+  
+  <!-- AI Tutor Modal -->
+  <div id="tutorModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);">
+    <div style="background:var(--surface); width:100%; max-width:650px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; max-height:85vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <div style="padding:15px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:var(--surface2); border-radius:12px 12px 0 0;">
+        <div style="font-weight:bold; font-size:1.2rem; color:var(--rose);">🤖 CSE AI Tutor</div>
+        <button onclick="document.getElementById('tutorModal').style.display='none'" style="background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">✖</button>
+      </div>
+      <div id="tutorChat" style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:15px; font-size:14px; line-height:1.6;">
+        <!-- Chat bubbles -->
+      </div>
+      <div style="padding:15px; border-top:1px solid var(--border); display:flex; gap:10px; background:var(--surface2); border-radius: 0 0 12px 12px;">
+        <input type="text" id="tutorInput" onkeydown="if(event.key === 'Enter') sendTutorMessage()" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text);" placeholder="Ask a question or reply...">
+        <button onclick="sendTutorMessage()" style="padding:10px 20px; background:var(--rose); color:#000; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">Send</button>
+      </div>
+    </div>
+  </div>
   </main>
 
   <script src="data.js"></script>
@@ -1154,9 +1171,12 @@ function renderCSE() {
       <div class="curr-title" style="font-size:1.1rem; color:var(--cream);">${d.topic}</div>
       <div class="curr-sub" style="font-size:13px;">${d.detail}</div>
       <div style="font-size:11px; color:var(--muted); font-style:italic; margin-top:5px;">"${QUOTES[Math.floor(Math.random()*QUOTES.length)]}"</div>
-      ${isDone ? 
-        `<button class="btn-done" style="margin-top:10px; align-self:flex-end; background:var(--accent-code); color:var(--bg); border:none;" disabled>COMPLETED</button>` : 
-        `<button class="btn-done" style="margin-top:10px; align-self:flex-end;" onclick="markCseDone(${d.d})">Mark Done</button>`}
+      <div style="display:flex; justify-content:flex-end; width:100%; gap:10px; margin-top:10px;">
+        <button class="btn-done" style="background:var(--rose); color:#000; border:none;" onclick="startCseTutor(${d.d})">🤖 AI Tutor</button>
+        ${isDone ? 
+          `<button class="btn-done" style="background:var(--accent-code); color:var(--bg); border:none;" disabled>COMPLETED</button>` : 
+          `<button class="btn-done" onclick="markCseDone(${d.d})">Mark Done</button>`}
+      </div>
     </div>
   `}).join('');
   const cseCont = document.getElementById("cseContainer");
@@ -1403,7 +1423,13 @@ function saveJournal() {
     document.getElementById("journalBackdate").checked = false;
   }
   renderJournals();
-  alert(isBackdate ? "Journal saved for yesterday night." : "Journal saved.");
+  
+  // Trigger AI analysis on journal save
+  if(typeof generateAIAnalysis === "function") {
+    generateAIAnalysis();
+  }
+  
+  alert(isBackdate ? "Journal saved for yesterday night." : "Journal saved and AI Analysis updated.");
 }
 
 function renderJournals() {
@@ -1413,7 +1439,18 @@ function renderJournals() {
   let journals = JSON.parse(localStorage.getItem('cc_journals') || '[]');
   container.innerHTML = "";
   
-  journals.forEach(j => {
+  // Only show past 3 days (cutoff is 3 days ago from now)
+  let cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 3);
+  
+  let filtered = journals.filter(j => new Date(j.date) >= cutoff);
+  
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="color:var(--muted); font-style:italic; font-size:12px;">No journal entries from the past 3 days.</div>`;
+    return;
+  }
+  
+  filtered.forEach(j => {
     let div = document.createElement('div');
     div.className = "log-form-box";
     div.style.padding = "1rem";
@@ -1423,6 +1460,67 @@ function renderJournals() {
     `;
     container.appendChild(div);
   });
+}
+
+// ==========================================
+// CSE AI TUTOR
+// ==========================================
+let currentTutorTopic = "";
+let currentTutorDetail = "";
+let tutorHistory = "";
+
+function startCseTutor(day) {
+  const dObj = CSE.find(x => x.d === day);
+  if(!dObj) return;
+  
+  currentTutorTopic = dObj.topic;
+  currentTutorDetail = dObj.detail;
+  tutorHistory = "";
+  
+  document.getElementById("tutorModal").style.display = "flex";
+  document.getElementById("tutorChat").innerHTML = `<div style="color:var(--muted); font-style:italic; text-align:center;">Initializing Tutor for: <b style="color:var(--cream);">${currentTutorTopic}</b>...</div>`;
+  
+  callTutorFunction("Teach me this topic in a simple way, and ask me a question to start.");
+}
+
+async function callTutorFunction(userPrompt) {
+  const chat = document.getElementById("tutorChat");
+  
+  if(userPrompt !== "Teach me this topic in a simple way, and ask me a question to start.") {
+    chat.innerHTML += `<div style="background:var(--surface2); padding:10px 15px; border-radius:12px 12px 0 12px; align-self:flex-end; max-width:85%; margin-top:10px; border:1px solid var(--border);"><b>You:</b><br>${userPrompt}</div>`;
+  }
+  chat.innerHTML += `<div id="tutorTyping" style="color:var(--muted); font-style:italic; margin-top:10px;">Tutor is typing...</div>`;
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const cseTutor = functions.httpsCallable('cseTutor');
+    const res = await cseTutor({
+      topic: currentTutorTopic,
+      detail: currentTutorDetail,
+      userPrompt: userPrompt,
+      history: tutorHistory
+    });
+    
+    document.getElementById("tutorTyping")?.remove();
+    const reply = res.data.text;
+    
+    tutorHistory += `\nUser: ${userPrompt}\nTutor: ${reply}`;
+    
+    let formattedReply = reply.replace(/\\n/g, '<br>').replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');
+    chat.innerHTML += `<div style="background:rgba(255,180,200,0.05); padding:10px 15px; border-radius:12px 12px 12px 0; align-self:flex-start; max-width:90%; border:1px solid rgba(255,180,200,0.2); margin-top:10px;"><b>🤖 Tutor:</b><br>${formattedReply}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+  } catch(e) {
+    document.getElementById("tutorTyping")?.remove();
+    chat.innerHTML += `<div style="color:var(--accent-warn); margin-top:10px; padding:10px; background:rgba(255,60,60,0.1); border-radius:8px;">Error: ${e.message} - Ensure you are authenticated and backend is updated!</div>`;
+  }
+}
+
+function sendTutorMessage() {
+  const input = document.getElementById("tutorInput");
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = "";
+  callTutorFunction(text);
 }
 
 // Call renderJournals on load
