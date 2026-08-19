@@ -561,9 +561,9 @@
 
       <div id="aiReportBox">
         <em>Awaiting Analysis...</em><br><br>
-        The AI Overseer takes your Huawei stats, Gym Logs, Nutrition, and Study pacing and analyzes your progress toward the Greek God physique and academic goals.
+        The AI Overseer takes your Huawei stats, Gym Logs, Nutrition, and Study pacing and analyzes your progress.
+        <br><br><span style="color:var(--rose);">Note: The full AI report is automatically generated and updated right after you click "Save Journal" for the day.</span>
       </div>
-      <button class="btn-primary" style="width:100%; margin-top: 15px;" onclick="generateAIAnalysis()">Generate Daily Analysis</button>
     </div>
   </div>
 
@@ -1575,10 +1575,12 @@ function generateAIAnalysis() {
     sleep: document.getElementById("mSleep") ? document.getElementById("mSleep").textContent : "0",
     hrv: document.getElementById("mHrv") ? document.getElementById("mHrv").textContent : "0",
     cycle: document.getElementById("mCycle") ? document.getElementById("mCycle").textContent : "0",
+    cdsEnabled: document.getElementById("cdsToggle") ? document.getElementById("cdsToggle").checked : false,
     cdsDays: cc_cds_done.length,
     cdsStreak: calculateStreak(cc_cds_done),
     cseDays: cc_cse_done.length,
     cseStreak: calculateStreak(cc_cse_done),
+    nutritionTicked: completedBlocks.includes(4),
     nutrition: `${macros.c}c, ${macros.p}p, ${macros.cb}cb, ${macros.f}f`,
     hydration: `${hydrationGlasses} glasses`,
     journal: journalContext

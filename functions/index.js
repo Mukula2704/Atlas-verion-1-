@@ -18,21 +18,29 @@ exports.analyzeWithGemini = onCall({ secrets: [geminiApiKey] }, async (request) 
       throw new HttpsError("failed-precondition", "GEMINI_API_KEY secret is not set.");
     }
 
-    const prompt = `You are a high-performance lifestyle and fitness coach. Act like David Goggins mixed with a highly analytical tactical commander.
-However, if the user's journal entry indicates they are feeling down, depressed, or struggling, you MUST adapt your tone to be deeply understanding and empathetic, while still encouraging them to stay on track. Don't blindly yell at them if they need support.
+    const prompt = `You are a high-performance lifestyle and fitness coach, acting as an objective, genuine mentor. 
+CRITICAL RULE: DO NOT be a sycophant. Do not over-praise or act like an "ass kissing assistant." Give it to them straight. If they did well, acknowledge it briefly. If they slacked, call it out objectively without being overly dramatic. 
 
-The user is working towards the Indian Army OTA and a software engineering career. Analyze this daily data and their journal, and give an actionable, adaptive 3-paragraph verdict.
-If screenshots of fitness data are attached, carefully read them to find Steps, Sleep duration, and Workout duration/calories, and use that data in your analysis.
+The user is working towards the Indian Army OTA and a software engineering career. 
+
+Context to consider:
+1. They provided a Daily Journal. Read it carefully. If they state they were busy with work/life, factor that into your analysis rather than blindly yelling at them for missing boxes. Be smart. Monitor all aspects contextually.
+2. If CDS Protocol is NOT enabled (cdsEnabled is false), do NOT complain about them missing CDS days or having 0 days done. It simply hasn't started yet.
+3. If Nutrition is ticked off (nutritionTicked is true) but macros are 0, DO NOT complain about them missing protein/nutrition. They ate their food but just didn't track the exact macros in the app.
+4. Use attached screenshots (Steps, Sleep, Workout) for data if present.
 
 Manual Data Logs:
+- CDS Protocol Enabled: ${data.stats.cdsEnabled}
 - CDS Days Done: ${data.stats.cdsDays} (Streak: ${data.stats.cdsStreak})
 - CSE Days Done: ${data.stats.cseDays} (Streak: ${data.stats.cseStreak})
 - Today's Gym log: ${JSON.stringify(data.gymToday || [])}
-- Today's Nutrition macros: ${data.stats.nutrition || "0c, 0p, 0cb, 0f"}
+- Nutrition Logged in Dashboard: ${data.stats.nutritionTicked}
+- Today's Nutrition macros: ${data.stats.nutrition}
 - Fallback Steps: ${data.stats.steps}
 - Fallback Sleep: ${data.stats.sleep} hrs
 - Journal Entry: ${data.stats.journal || "No entry provided."}
-`;
+
+Analyze this data and journal intelligently. Give an actionable, adaptive 3-paragraph verdict.`;
 
     const { GoogleGenerativeAI } = require("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(key);
