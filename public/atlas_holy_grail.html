@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS Command Center</title>
+    <link rel="stylesheet" href="atlas_holy_grail.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="theme-default">
+    <div id="ambient-bg"></div>
+
+    <!-- The Side Navigation (Just Icons, Right Side) -->
+    <nav class="right-nav">
+        <button data-target="default-tab" data-theme="theme-default" class="active"><i class="fa-solid fa-house"></i></button>
+        <button data-target="deepwork-tab" data-theme="theme-deepwork"><i class="fa-solid fa-brain"></i></button>
+        <button data-target="health-tab" data-theme="theme-health"><i class="fa-solid fa-heart-pulse"></i></button>
+        <button data-target="finance-tab" data-theme="theme-finance"><i class="fa-solid fa-money-bill-trend-up"></i></button>
+        <button data-target="love-tab" data-theme="theme-love"><i class="fa-solid fa-heart"></i></button>
+        <button data-target="guest-tab" data-theme="theme-guest"><i class="fa-solid fa-user-secret"></i></button>
+        <button data-target="misc-tab" data-theme="theme-misc"><i class="fa-solid fa-cube"></i></button>
+    </nav>
+
+    <!-- The Absolute Dead Center ATLAS Logo (Always visible) -->
+    <div class="atlas-core">
+        <div class="core-ring r1"></div>
+        <div class="core-ring r2"></div>
+        <div class="core-ring r3"></div>
+        <div class="core-text">ATLAS</div>
+    </div>
+
+    <!-- Full Screen Grid Layout -->
+    <main class="master-container">
+
+        <!-- 1. DEFAULT TAB -->
+        <div id="default-tab" class="tab-page active">
+            <div class="box" style="grid-area: 1 / 1 / 5 / 4;">
+                <div class="box-title">Motivation</div>
+                <div class="inner-content">
+                    <p>Keep cool.</p>
+                    <p>A good motivation.</p>
+                    <p class="highlight">Quotes and things I usually fail to do.</p>
+                </div>
+            </div>
+            
+            <div class="box" style="grid-area: 5 / 1 / 7 / 4;">
+                <div class="box-title">Live clock</div>
+                <div class="big-text time-display">00:00</div>
+            </div>
+
+            <div class="box" style="grid-area: 7 / 1 / 9 / 4;">
+                <div class="box-title">Skincare</div>
+                <div class="icon-center"><i class="fa-solid fa-pump-soap skincare-icon"></i></div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 1 / 13 / 4;">
+                <div class="box-title">Be relentless</div>
+                <ul class="checklist">
+                    <li><i class="fa-regular fa-square"></i> Training</li>
+                    <li><i class="fa-regular fa-square"></i> Study</li>
+                    <li><i class="fa-regular fa-square"></i> Sleep</li>
+                    <li><i class="fa-regular fa-square"></i> Nutrition</li>
+                    <li><i class="fa-regular fa-square"></i> Practice</li>
+                </ul>
+                <div class="highlight text-center mt-2">Nobody will push you JUMP!</div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 5 / 4 / 9;">
+                <div class="box-title">College Block</div>
+                <div class="inner-content">Classes (time & date)</div>
+            </div>
+
+            <div class="box" style="grid-area: 10 / 5 / 13 / 9;">
+                <div class="box-title">Sleep Cycles</div>
+                <div class="flex-around">
+                    <div>ROM<br>3hr</div>
+                    <div>Deep<br>3hr</div>
+                    <div>Light<br>2hr</div>
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 10 / 3 / 13;">
+                <div class="flex-around h-100">
+                    <i class="fa-brands fa-discord"></i>
+                    <i class="fa-regular fa-bell"></i>
+                    <i class="fa-solid fa-battery-half"></i>
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 10 / 8 / 13;">
+                <div class="box-title">Todays agenda</div>
+                <ul class="clean-list">
+                    <li>Tasks need to be done</li>
+                    <li>Some meet some call</li>
+                    <li>Any important dates etc</li>
+                </ul>
+            </div>
+
+            <div class="box" style="grid-area: 8 / 10 / 10 / 13;">
+                <div class="quote-text text-center">"The person who pivots will be dead, And the person who finishes will take his place"</div>
+            </div>
+
+            <div class="box" style="grid-area: 10 / 10 / 13 / 13;">
+                <div class="box-title">30 Box Month Checklist</div>
+                <div class="grid-crosses">
+                    <span>X</span><span>X</span><span>X</span><span>X</span><span>X</span>
+                    <span>X</span><span>X</span><span>X</span><span>X</span><span>X</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. FINANCE TAB -->
+        <div id="finance-tab" class="tab-page">
+            <div class="box" style="grid-area: 1 / 1 / 3 / 4;">
+                <div class="box-title">Futures & Options</div>
+                <div class="inner-content">Business / Fund / Views / Medical</div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 1 / 5 / 4;">
+                <div class="box-title">My Investments Plan</div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 4 / 5 / 7;">
+                <div class="box-title">Business Down Pay</div>
+                <div class="big-text">600 days</div>
+            </div>
+
+            <div class="box" style="grid-area: 5 / 1 / 7 / 4;">
+                <div class="box-title">My Investment Sum</div>
+                <div class="big-text highlight">1.5L</div>
+            </div>
+
+            <div class="box" style="grid-area: 5 / 4 / 9 / 7;">
+                <div class="box-title">Spend Audit</div>
+                <ul class="bubble-list">
+                    <li><i class="fa-solid fa-landmark"></i> Loans</li>
+                    <li><i class="fa-solid fa-piggy-bank"></i> Save</li>
+                    <li><i class="fa-solid fa-chart-line"></i> Invest</li>
+                    <li><i class="fa-solid fa-martini-glass"></i> Live</li>
+                </ul>
+            </div>
+
+            <div class="box" style="grid-area: 7 / 1 / 10 / 4;">
+                <div class="box-title">Strategy</div>
+                <div class="inner-content">Need to take a Plot soon.<br>1 CR reality check.</div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 5 / 4 / 9;">
+                <div class="box-title">Financial News</div>
+                <div class="inner-content placeholder-lines"></div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 7 / 11 / 9;">
+                <div class="box-title">My Bank accounts</div>
+                <div class="big-text">Balance</div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 5 / 11 / 7;">
+                <div class="quote-text text-center mt-2">"Work For ur Dream life"</div>
+            </div>
+
+            <!-- Road to First Cr - Jar Animation -->
+            <div class="box" style="grid-area: 1 / 9 / 5 / 12; overflow: hidden; position: relative;">
+                <div class="box-title">Road to First Cr.</div>
+                <div class="jar-anim-container">
+                    <div class="falling-money m1"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="falling-money m2"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="jar">
+                        <div class="jar-liquid" style="height: 1%;"></div>
+                        <div class="jar-text">1%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 12 / 3 / 13;">
+                <div class="text-center mt-2">Auto negotiator for service</div>
+            </div>
+
+            <div class="box" style="grid-area: 5 / 9 / 9 / 13;">
+                <div class="box-title">Key Notes</div>
+                <div class="inner-content">Where I should buy and invest and how much I should atlas it to make daily limit to be better</div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 9 / 13 / 13;">
+                <div class="box-title">Assets</div>
+                <div class="asset-table">
+                    <div>Gold <span>22.4K</span></div>
+                    <div>Silver <span>2K</span></div>
+                    <div>REITs <span>10K</span></div>
+                    <div>MidCap <span>50K</span></div>
+                    <div>SmlCap <span>20K</span></div>
+                    <div>PPF <span>80K</span></div>
+                    <div>Crypto <span>20K</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. HEALTH TAB -->
+        <div id="health-tab" class="tab-page">
+            <div class="box" style="grid-area: 1 / 1 / 3 / 4;">
+                <div class="box-title">Motivation to Push Physically</div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 1 / 9 / 4;">
+                <div class="box-title">Todays workout split Morning</div>
+                <ul class="clean-list">
+                    <li><i class="fa-regular fa-square"></i> Exercise 1</li>
+                    <li><i class="fa-regular fa-square"></i> Exercise 2</li>
+                </ul>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 1 / 13 / 4;">
+                <div class="box-title">Nutrition taken</div>
+                <div class="flex-around mt-2">
+                    <div>P<br>--</div>
+                    <div>C<br>--</div>
+                    <div>F<br>--</div>
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 5 / 3 / 9;">
+                <div class="box-title">Live clock</div>
+                <div class="big-text time-display">00:00</div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 5 / 5 / 9;">
+                <div class="box-title">Morning workout stats</div>
+                <div class="inner-content">Calories: 360 | Avg HR: 130bpm<br>Duration: 1:14pm</div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 5 / 11 / 9;">
+                <div class="box-title">Evening workout stats</div>
+                <div class="inner-content">Calories: 200 | Avg HR: 130bpm<br>Duration: 30min</div>
+            </div>
+
+            <div class="box" style="grid-area: 11 / 5 / 13 / 9;">
+                <div class="box-title">Evening workout split</div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 9 / 4 / 11;">
+                <div class="box-title">Steps</div>
+                <div class="big-text text-center">7200</div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 11 / 3 / 13;">
+                <div class="box-title text-center">No Junk Food</div>
+                <div class="grid-crosses small"><span>V</span><span>X</span><span>X</span></div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 11 / 5 / 13;">
+                <div class="box-title">Knuckles cracked</div>
+                <div class="big-text text-center">5 times</div>
+            </div>
+
+            <div class="box" style="grid-area: 4 / 9 / 7 / 13;">
+                <div class="box-title">Todays Weight Day</div>
+                <div class="flex-around mt-2">
+                    <div>E1<br>X</div>
+                    <div>E2<br>V</div>
+                    <div>E3<br>X</div>
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 7 / 9 / 10 / 11;">
+                <div class="box-title">Sleep Stats</div>
+                <div class="inner-content small-text">Rem 2h<br>Deep 2h<br>Light 2h<br>Wakeup 2 times</div>
+            </div>
+
+            <div class="box" style="grid-area: 7 / 11 / 10 / 13;">
+                <div class="box-title text-center">VO2 Max</div>
+                <div class="big-text text-center mt-2">32%</div>
+            </div>
+
+            <div class="box" style="grid-area: 10 / 9 / 13 / 11;">
+                <div class="box-title text-center">Sleep Score</div>
+                <div class="big-text text-center mt-2 highlight">8.5hrs</div>
+            </div>
+
+            <div class="box" style="grid-area: 10 / 11 / 12 / 13;">
+                <div class="box-title">Posture corrected</div>
+                <div class="text-center">60% time</div>
+            </div>
+
+            <div class="box" style="grid-area: 12 / 11 / 13 / 13;">
+                <div class="box-title">Current Weight</div>
+                <div class="text-center">75 kg</div>
+            </div>
+        </div>
+
+        <!-- 4. DEEP WORK TAB -->
+        <div id="deepwork-tab" class="tab-page">
+            <div class="box" style="grid-area: 1 / 1 / 3 / 3;">
+                <div class="box-title">Timer</div>
+                <div class="big-text time-display">00:00</div>
+            </div>
+            
+            <div class="box" style="grid-area: 1 / 3 / 3 / 5;">
+                <div class="box-title">Deep work clock</div>
+                <div class="big-text">6:00:00</div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 1 / 6 / 4;">
+                <div class="box-title">CS learning till now</div>
+            </div>
+
+            <div class="box" style="grid-area: 6 / 1 / 8 / 4;">
+                <div class="box-title">Financial learning</div>
+            </div>
+
+            <div class="box" style="grid-area: 8 / 1 / 10 / 2;">
+                <div class="box-title">Leetcode</div>
+            </div>
+            <div class="box" style="grid-area: 8 / 2 / 10 / 3;">
+                <div class="box-title">Books</div>
+            </div>
+            <div class="box" style="grid-area: 8 / 3 / 10 / 4;">
+                <div class="box-title">Freelance</div>
+            </div>
+
+            <div class="box" style="grid-area: 10 / 1 / 13 / 4;">
+                <div class="box-title">Current Book I am reading</div>
+            </div>
+
+            <div class="box" style="grid-area: 10 / 4 / 13 / 7;">
+                <div class="box-title">Learning curve</div>
+                <div class="placeholder-chart"></div>
+            </div>
+
+            <div class="box" style="grid-area: 10 / 7 / 13 / 10;">
+                <div class="box-title">Upcoming Project Plans</div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 9 / 4 / 13;">
+                <div class="box-title">Atlas's progress</div>
+                <div class="inner-content">On getting better and evolving</div>
+            </div>
+
+            <div class="box" style="grid-area: 4 / 9 / 6 / 11;">
+                <div class="box-title">New Job</div>
+                <div class="inner-content">Better to go</div>
+            </div>
+
+            <div class="box" style="grid-area: 4 / 11 / 6 / 13;">
+                <div class="box-title">Next agenda</div>
+                <div class="inner-content">To learn</div>
+            </div>
+
+            <div class="box" style="grid-area: 6 / 9 / 9 / 13;">
+                <div class="box-title">Deep work done for 6hrs</div>
+                <ul class="clean-list">
+                    <li>Read CS for 3hrs</li>
+                    <li>Read Book 20 Min</li>
+                    <li>Practice CS for 1hr</li>
+                    <li>Freelance 2hr</li>
+                </ul>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 9 / 11 / 13;">
+                <div class="box-title">Quotes from famous facts</div>
+            </div>
+
+            <div class="box" style="grid-area: 11 / 9 / 13 / 13;">
+                <div class="box-title">Progress bar of deep work</div>
+                <div class="grid-crosses pb-bar">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. LOVE / GF TAB -->
+        <div id="love-tab" class="tab-page">
+            <div class="box" style="grid-area: 1 / 1 / 4 / 4; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-heart" style="font-size: 4rem; color: var(--theme-color);"></i>
+            </div>
+
+            <!-- Mood Analysis Animation -->
+            <div class="box" style="grid-area: 1 / 5 / 4 / 9; overflow: hidden; position: relative;">
+                <div class="box-title">Mood analysis</div>
+                <div class="bench-animation">
+                    <div class="bench"></div>
+                    <div class="stick-figure m1"><i class="fa-solid fa-person"></i></div>
+                    <div class="stick-figure f1"><i class="fa-solid fa-person-dress"></i></div>
+                    <div class="mood-indicator"><i class="fa-solid fa-heart"></i></div>
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 1 / 10 / 2 / 13;">
+                <div class="text-center">Last Sex: 15 days ago</div>
+            </div>
+
+            <div class="box" style="grid-area: 2 / 10 / 6 / 13;">
+                <div class="box-title">Combined Saving</div>
+                <ul class="clean-list">
+                    <li>Liquid Fund 10k</li>
+                    <li>Saving 20k</li>
+                    <li>Emergency 30k</li>
+                    <li>Small 10k</li>
+                </ul>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="box" style="grid-area: 4 / 1 / 6 / 9;">
+                <div class="flex-around h-100">
+                    <div>Steps<br>6500</div>
+                    <div>Resting HR<br>72bpm</div>
+                    <div>Sleep<br>7H 48min</div>
+                    <div>Avg Stress<br>48</div>
+                    <div>Sleep Score<br>84pt</div>
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 6 / 1 / 9 / 4;">
+                <div class="box-title">Sleep details</div>
+                <ul class="clean-list">
+                    <li>REM 1Hr</li>
+                    <li>PEEP 2Hr</li>
+                    <li>Light 3Hr</li>
+                    <li>Wakeup 1 time</li>
+                </ul>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 1 / 11 / 4;">
+                <div class="box-title">Period tracker</div>
+            </div>
+
+            <div class="box" style="grid-area: 11 / 1 / 13 / 4;">
+                <div class="box-title">Next date</div>
+                <div class="inner-content">On 11th<br>BGP ₹0.00</div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 5 / 13 / 9;">
+                <ul class="clean-list mt-2">
+                    <li>Date ideas</li>
+                    <li>Things she might have said she needs</li>
+                    <li>Gifts she likes</li>
+                </ul>
+            </div>
+
+            <div class="box" style="grid-area: 6 / 10 / 9 / 13;">
+                <div class="box-title">Her financial goals & Investmnts</div>
+                <div class="inner-content">
+                    Assets: 1CR | Debt: 0<br>Monthly: 50k
+                </div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 10 / 13 / 13;">
+                <div class="box-title">Last argument</div>
+                <div class="inner-content mt-2">Where I went wrong</div>
+                <div class="inner-content mt-2">How to avoid it</div>
+            </div>
+        </div>
+
+        <!-- 6. GUEST TAB -->
+        <div id="guest-tab" class="tab-page">
+            <div class="box" style="grid-area: 3 / 5 / 5 / 9; border: none; background: transparent; text-align: center;">
+                <h1 style="font-size: 2.5rem; font-family: 'Outfit';">Hello! How may I help you</h1>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 2 / 5 / 4;">
+                <div class="box-title">Live clock</div>
+                <div class="big-text time-display">00:00</div>
+            </div>
+
+            <div class="box" style="grid-area: 3 / 10 / 6 / 12;">
+                <div class="box-title">News headlines</div>
+                <div class="placeholder-lines"></div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 2 / 11 / 4;">
+                <div class="inner-content text-center">Quotes from famous people</div>
+            </div>
+
+            <div class="box" style="grid-area: 9 / 5 / 10 / 9; border: none; background: transparent; text-align: center;">
+                <p style="font-size: 1.2rem; font-family: 'Outfit';">Ask me anything.</p>
+            </div>
+
+            <div class="box highlight-border" style="grid-area: 8 / 10 / 11 / 12; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <i class="fa-solid fa-fingerprint mb-2" style="font-size: 2rem;"></i>
+                <div class="text-center font-weight-bold">Please command to Authenticate</div>
+            </div>
+        </div>
+
+        <!-- 7. MISC TAB (Bumblebee Yellow) -->
+        <div id="misc-tab" class="tab-page">
+            <div class="box" style="grid-area: 1 / 1 / 13 / 13; display: flex; align-items: center; justify-content: center;">
+                <h1>Miscellaneous Operations & Server Vitals</h1>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="atlas_holy_grail.js"></script>
+</body>
+</html>

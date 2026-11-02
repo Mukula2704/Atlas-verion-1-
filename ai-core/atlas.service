@@ -1,0 +1,19 @@
+[Unit]
+Description=ATLAS Cognitive Engine Daemon
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/ai-core
+# Activates the virtual environment and runs the core script
+ExecStart=/root/ai-core/venv/bin/python3 /root/ai-core/atlas_core.py
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=atlas-core
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target

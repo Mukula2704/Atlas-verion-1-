@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS Command Center V2 (JARVIS Core)</title>
+    <!-- Google Fonts: Inter for minimal clean UI, JetBrains Mono for Hacker aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f4f7;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+            /* The deep red accent color */
+            --accent-red: #d32f2f;
+            --accent-glow: rgba(211, 47, 47, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Subtle dot grid pattern for the hacker vibe */
+            background-image: radial-gradient(var(--text-muted) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: 0 0;
+        }
+
+        /* The Heads-Up Display (HUD) Layout */
+        .hud-container {
+            position: relative;
+            width: 95vw;
+            height: 95vh;
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Glassmorphism Panel Base */
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: var(--glass-shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Red Accent bar on top of each panel */
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-red);
+            opacity: 0.8;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            border-color: rgba(211, 47, 47, 0.2);
+            box-shadow: 0 10px 40px var(--accent-glow);
+        }
+
+        .panel-header {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-red);
+            box-shadow: 0 0 8px var(--accent-red);
+            animation: blink 2s infinite;
+        }
+
+        /* Hacker aesthetic for data streams */
+        .data-stream {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .data-stream p {
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            color: var(--accent-red);
+            font-weight: 700;
+            background: rgba(211, 47, 47, 0.08);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        /* Specific Panel Placements */
+        .panel-top-left { grid-column: 1; grid-row: 1; }
+        .panel-bottom-left { grid-column: 1; grid-row: 2; }
+        .panel-top-right { grid-column: 3; grid-row: 1; }
+        .panel-bottom-right { grid-column: 3; grid-row: 2; }
+
+        /* --- THE ATLAS CORE (JARVIS STYLE) --- */
+        .orb-container {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Dynamic moving rings */
+        .jarvis-core {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        /* Inner glowing energy core */
+        .ring-inner {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, var(--accent-red) 20%, transparent 80%);
+            box-shadow: 0 0 30px var(--accent-red);
+            animation: pulse-core 3s infinite alternate ease-in-out;
+            z-index: 10;
+        }
+
+        /* Middle dashed ring */
+        .ring-middle {
+            width: 140px;
+            height: 140px;
+            border: 2px dashed rgba(211, 47, 47, 0.6);
+            animation: spin 15s linear infinite;
+        }
+
+        /* Outer segmented ring */
+        .ring-outer {
+            width: 200px;
+            height: 200px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-top: 3px solid var(--accent-red);
+            border-bottom: 3px solid var(--accent-red);
+            animation: spin-reverse 20s linear infinite;
+        }
+
+        /* Farthest faint orbit */
+        .ring-orbit {
+            width: 260px;
+            height: 260px;
+            border: 1px dotted rgba(0, 0, 0, 0.2);
+            animation: spin 30s linear infinite;
+        }
+
+        /* Speaking State Animations */
+        .jarvis-core.speaking .ring-inner {
+            animation: speak-core 0.4s infinite alternate;
+            box-shadow: 0 0 60px var(--accent-red), inset 0 0 20px #fff;
+        }
+
+        .jarvis-core.speaking .ring-middle {
+            border-color: var(--accent-red);
+            animation: spin 2s linear infinite;
+        }
+
+        .jarvis-core.speaking .ring-outer {
+            border-top-color: #000;
+            border-bottom-color: #000;
+            animation: spin-reverse 3s linear infinite;
+        }
+
+        /* Audio waveforms when speaking */
+        .audio-wave {
+            position: absolute;
+            bottom: -50px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .jarvis-core.speaking ~ .audio-wave {
+            opacity: 1;
+        }
+
+        .bar {
+            width: 4px;
+            height: 10px;
+            background: var(--accent-red);
+            border-radius: 2px;
+            animation: wave 0.8s infinite alternate ease-in-out;
+        }
+        
+        .bar:nth-child(1) { animation-delay: 0.0s; }
+        .bar:nth-child(2) { animation-delay: 0.2s; }
+        .bar:nth-child(3) { animation-delay: 0.4s; }
+        .bar:nth-child(4) { animation-delay: 0.1s; }
+        .bar:nth-child(5) { animation-delay: 0.5s; }
+        .bar:nth-child(6) { animation-delay: 0.3s; }
+        .bar:nth-child(7) { animation-delay: 0.0s; }
+
+        @keyframes wave {
+            0% { height: 10px; }
+            100% { height: 40px; }
+        }
+
+        @keyframes pulse-core {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.15); opacity: 1; }
+        }
+
+        @keyframes speak-core {
+            0% { transform: scale(1.1); }
+            100% { transform: scale(1.4); }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spin-reverse {
+            100% { transform: rotate(-360deg); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        /* Orb Status Text */
+        .orb-status {
+            position: absolute;
+            bottom: 10%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--accent-red);
+        }
+        
+        /* Floating HUD lines */
+        .hud-line {
+            position: absolute;
+            background: rgba(0,0,0,0.03);
+            z-index: 1;
+        }
+        .line-h { width: 100%; height: 1px; top: 50%; left: 0; }
+        .line-v { height: 100%; width: 1px; left: 50%; top: 0; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="hud-line line-h"></div>
+    <div class="hud-line line-v"></div>
+
+    <div class="hud-container">
+        
+        <!-- Left Panels -->
+        <div class="panel panel-top-left">
+            <div class="panel-header">
+                System Status <div class="status-dot"></div>
+            </div>
+            <div class="data-stream">
+                <p>> ATLAS Core: <span class="highlight">ONLINE</span></p>
+                <p>> CPU Load: 12%</p>
+                <p>> Memory: 2.1 GB / 16 GB</p>
+                <p>> Network: 1.2 Gbps [SECURE]</p>
+                <br>
+                <p>> Ghost Protocol: <span style="color:#aaa">STANDBY</span></p>
+                <p>> Firewall: ACTIVE</p>
+            </div>
+        </div>
+
+        <div class="panel panel-bottom-left">
+            <div class="panel-header">
+                Biometric Feed <div class="status-dot"></div>
+            </div>
+            <div class="data-stream">
+                <p>> Subject: Mukul</p>
+                <p>> HRV: <span class="highlight">55 ms</span> (Optimal)</p>
+                <p>> Posture: Aligned (Sentinel Active)</p>
+                <br>
+                <p>> Subject: Inner Circle (GF)</p>
+                <p>> HRV: 42 ms (Stable)</p>
+            </div>
+        </div>
+
+        <!-- CENTER CORE (JARVIS STYLE) -->
+        <div class="orb-container">
+            <div class="jarvis-core" id="atlas-orb" onclick="toggleSpeaking()">
+                <div class="ring ring-orbit"></div>
+                <div class="ring ring-outer"></div>
+                <div class="ring ring-middle"></div>
+                <div class="ring ring-inner"></div>
+            </div>
+            
+            <div class="audio-wave">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+
+            <div class="orb-status" id="orb-text">ATLAS_IDLE</div>
+        </div>
+
+        <!-- Right Panels -->
+        <div class="panel panel-top-right">
+            <div class="panel-header">
+                Live Intelligence <div class="status-dot"></div>
+            </div>
+            <div class="data-stream">
+                <p>> [MARKET] NIFTY 50: +0.4%</p>
+                <p>> [MARKET] BTC: <span class="highlight">-1.2%</span></p>
+                <br>
+                <p>> [CRAWLER] 3 new HN threads detected on specialized AI agents.</p>
+                <br>
+                <p>> [SECURITY] 0 new breaches detected.</p>
+            </div>
+        </div>
+
+        <div class="panel panel-bottom-right">
+            <div class="panel-header">
+                Active Tasks <div class="status-dot"></div>
+            </div>
+            <div class="data-stream">
+                <p>> <input type="checkbox" checked> Build Phantom Coder</p>
+                <p>> <input type="checkbox" checked> Build Auto-Scribe</p>
+                <p>> <input type="checkbox" checked> Spam Call Assistant</p>
+                <br>
+                <p>> <input type="checkbox"> Voice ID Comm-Link</p>
+                <p>> <input type="checkbox" class="highlight"> UI/UX Overhaul</p>
+                <p>> <input type="checkbox"> Spatial Face-ID Engine</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // JS to toggle the speaking animation for demonstration
+        const orb = document.getElementById('atlas-orb');
+        const orbText = document.getElementById('orb-text');
+        let isSpeaking = false;
+
+        function toggleSpeaking() {
+            isSpeaking = !isSpeaking;
+            if (isSpeaking) {
+                orb.classList.add('speaking');
+                orbText.innerText = "ATLAS_SPEAKING";
+            } else {
+                orb.classList.remove('speaking');
+                orbText.innerText = "ATLAS_IDLE";
+            }
+        }
+    </script>
+</body>
+</html>

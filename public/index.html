@@ -14,6 +14,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 
+<script src="data.js" defer></script>
+<script src="masterclass.js" defer></script>
+
 <style>
   :root {
     --bg: #110e0e; /* Noir Black variant for depth */
@@ -225,6 +228,36 @@
   .reminder-text { color: var(--cream); font-size: 14px; flex: 1; }
   .reminder-del { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 5px; font-size: 14px; }
   .reminder-del:hover { color: var(--rose); }
+
+  /* AI TERMINAL */
+  .ai-terminal-wrap { background: rgba(12, 8, 9, 0.9); border: 1px solid var(--border2); border-radius: 12px; margin-bottom: 2rem; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .ai-terminal-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(26,17,24,0.6); }
+  .ai-terminal-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--rose); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .ai-terminal-title::before { content: ''; width: 6px; height: 6px; background: var(--rose); border-radius: 50%; box-shadow: 0 0 10px var(--rose); animation: pulseRed 2s infinite; }
+  @keyframes pulseRed { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .ai-node-status { display: flex; gap: 12px; flex-wrap: wrap; }
+  .node-indicator { font-size: 9px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .node-indicator .dot { width: 6px; height: 6px; border-radius: 50%; background: #444; }
+  .node-indicator.online .dot { background: #88ddcc; box-shadow: 0 0 8px #88ddcc; }
+  
+  .ai-terminal-body { padding: 16px; height: 180px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); line-height: 1.6; display: flex; flex-direction: column; gap: 8px; }
+  .ai-terminal-body::-webkit-scrollbar { width: 4px; }
+  .ai-terminal-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+  .ai-terminal-input-wrap { display: flex; align-items: center; padding: 10px 16px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.5); }
+  .ai-prompt-caret { color: var(--rose); margin-right: 10px; font-weight: bold; font-family: 'JetBrains Mono', monospace; }
+  #aiCommandInput { background: transparent; border: none; color: var(--cream); font-family: 'JetBrains Mono', monospace; font-size: 13px; flex: 1; outline: none; }
+  #aiCommandInput::placeholder { color: var(--muted2); }
+  .ai-log-entry { opacity: 0.9; animation: slideInLeft 0.3s ease-out forwards; }
+  .ai-log-time { color: var(--muted2); font-size: 10px; margin-right: 8px; }
+  .ai-log-source { color: var(--accent-code); margin-right: 8px; font-weight: 700; }
+  .ai-log-source.VISION { color: #bb88ff; }
+  .ai-log-source.SWARM { color: var(--rose); }
+  .ai-log-source.HEALTH { color: #ffcc88; }
+  @keyframes slideInLeft { from { opacity: 0; transform: translateX(-10px); } to { opacity: 0.9; transform: translateX(0); } }
+  
+  .ai-vision-feed { display: none; height: 200px; background: #000; border-top: 1px solid var(--border); position: relative; background-image: radial-gradient(rgba(136, 221, 204, 0.1) 1px, transparent 1px); background-size: 20px 20px; }
+  .ai-vision-feed.active { display: block; }
+  .vision-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted2); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -344,6 +377,39 @@
   
   <!-- BLOCKS -->
   <div class="panel active" id="tab-today">
+    
+    <!-- AI COMMAND CENTER -->
+    <div class="ai-terminal-wrap">
+      <div class="ai-terminal-header">
+        <div class="ai-terminal-title">NEURAL LINK ACTIVE</div>
+        <div class="ai-node-status">
+          <div class="node-indicator online"><div class="dot"></div>DASH</div>
+          <div class="node-indicator" id="node-server"><div class="dot"></div>SERVER</div>
+          <div class="node-indicator" id="node-vision"><div class="dot"></div>VISION</div>
+        </div>
+      </div>
+      
+      <!-- The scrolling logs -->
+      <div class="ai-terminal-body" id="aiTerminalStream">
+        <div class="ai-log-entry">
+          <span class="ai-log-time">[SYS]</span>
+          <span class="ai-log-source">ORCHESTRATOR:</span>
+          Awaiting Python backend handshake...
+        </div>
+      </div>
+
+      <!-- The Vision Placeholder (Toggled via JS when needed) -->
+      <div class="ai-vision-feed" id="aiVisionFeed">
+        <div class="vision-placeholder">Awaiting Camera Stream...</div>
+      </div>
+      
+      <!-- The Command Input -->
+      <div class="ai-terminal-input-wrap">
+        <span class="ai-prompt-caret">></span>
+        <input type="text" id="aiCommandInput" placeholder="Command ATLAS..." autocomplete="off" onkeydown="handleAICommand(event)" />
+      </div>
+    </div>
+
     <div class="day-progress-wrap">
       <div class="dp-header"><span>Day Progress</span><span id="dpbPct">0%</span></div>
       <div class="dp-track"><div class="dp-fill" id="dpbFill" style="width:0%"></div></div>
@@ -417,7 +483,10 @@
   </div>
 
   <div class="panel" id="tab-cse">
-    <div class="sec-head">Skill & App Dev — 10 Weeks</div>
+    <div class="sec-head" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Skill & App Dev — 10 Weeks</span>
+      <button class="btn-primary" style="padding: 6px 12px; font-size: 11px; background:linear-gradient(45deg, #ff2a2a, #d4af37);" onclick="openMasterclass()">🧠 AI Masterclass</button>
+    </div>
     
     <div class="grid-4" style="margin-bottom: 20px;">
       <div class="stat-box"><div class="stat-num" id="cseCurrentDay" style="color:var(--green)">1</div><div class="stat-label">Current Day</div></div>
@@ -667,6 +736,19 @@
       </div>
     </div>
   </div>
+
+  <!-- AI Masterclass Modal -->
+  <div id="masterclassModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(10px);">
+    <div style="background:var(--surface); width:100%; max-width:800px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; max-height:85vh; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+      <div style="padding:15px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:var(--surface2); border-radius:12px 12px 0 0;">
+        <div style="font-weight:bold; font-size:1.2rem; color:#d4af37;">🧠 AI Architecture Masterclass</div>
+        <button onclick="document.getElementById('masterclassModal').style.display='none'" style="background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">✖</button>
+      </div>
+      <div id="masterclassContent" style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:15px; font-size:14px; line-height:1.6;">
+        <!-- Javascript will inject the curriculum here -->
+      </div>
+    </div>
+  </div>
   </main>
 
   <script src="data.js"></script>
@@ -727,6 +809,42 @@ function savePreferences() {
   }, { merge: true });
 }
 
+function addAILog(agentName, text, isAction=false) {
+  const term = document.getElementById("aiTerminalStream");
+  if(!term) return;
+  
+  const div = document.createElement("div");
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ":" + 
+                  now.getMinutes().toString().padStart(2,'0') + ":" + 
+                  now.getSeconds().toString().padStart(2,'0');
+
+  const color = isAction ? 'var(--rose)' : 'var(--muted)';
+  
+  div.innerHTML = `<span style="color:var(--accent-warn)">[${timeStr}]</span> <strong style="color:${color}">${agentName}:</strong> ${text}`;
+  
+  term.appendChild(div);
+  term.scrollTop = term.scrollHeight;
+}
+
+function handleAICommand(e) {
+  if (e.key === 'Enter') {
+    const input = document.getElementById("aiCommandInput");
+    const text = input.value.trim();
+    if (!text) return;
+    
+    // Send to Firestore (which will auto-trigger addAILog via the listener)
+    db.collection("ai_stream").add({
+      agent: "USER",
+      text: text,
+      isAction: false,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    input.value = "";
+  }
+}
+
 function initCloudSync() {
   // Global Sync
   db.collection("user_data").doc("preferences").onSnapshot(doc => {
@@ -767,6 +885,16 @@ function initCloudSync() {
       const hGlass = document.getElementById("hGlass");
       if(hGlass) hGlass.innerHTML = `${hydrationGlasses} <span style="font-size:14px; font-weight:400; color:var(--muted)">glasses</span>`;
     }
+  });
+
+  // AI Stream Listener
+  db.collection("ai_stream").orderBy("timestamp", "asc").onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "added") {
+        const data = change.doc.data();
+        addAILog(data.agent || "UNKNOWN", data.text || "", data.isAction || false);
+      }
+    });
   });
 }
 
@@ -1810,6 +1938,37 @@ document.addEventListener('click', function(e) {
     }
   }
 });
+
+// ==========================================
+// AI PROJECT MASTERCLASS
+// ==========================================
+function openMasterclass() {
+  const modal = document.getElementById('masterclassModal');
+  const container = document.getElementById('masterclassContent');
+  if (!modal || !container) return;
+  
+  if (typeof AI_MASTERCLASS === 'undefined') {
+    container.innerHTML = '<div style="color:var(--rose);">Error: masterclass.js not loaded. Refresh the page.</div>';
+    modal.style.display = 'flex';
+    return;
+  }
+
+  let html = `<div style="color:var(--muted); font-size:12px; margin-bottom:10px;">Study this curriculum to understand the AI backend architecture.</div>`;
+  
+  AI_MASTERCLASS.forEach(lesson => {
+    html += `
+      <div style="background:rgba(0,0,0,0.5); padding:1rem; border-radius:10px; border:1px solid var(--border);">
+        <div style="font-size:12px; color:var(--rose); margin-bottom:5px;">LESSON ${lesson.day} | ${lesson.topic}</div>
+        <div style="font-size:18px; color:var(--cream); font-weight:600; margin-bottom:8px;">${lesson.title}</div>
+        <div style="font-size:14px; color:var(--text); line-height:1.5; margin-bottom:15px;">${lesson.detail}</div>
+        <div style="background:#0a0808; padding:10px; border-radius:6px; border:1px solid var(--border2); font-family:var(--mono); font-size:12px; color:#a9dc76; overflow-x:auto; white-space:pre-wrap;">${lesson.codeSnippet}</div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  modal.style.display = 'flex';
+}
 
 init();
 </script>

@@ -1,0 +1,269 @@
+/* atlas_dashboard.css */
+
+:root {
+    --bg-dark: #0d0e15;
+    --card-bg: #15161e;
+    --card-border: rgba(255, 255, 255, 0.04);
+    --card-light-bg: #ffffff;
+    --text-main: #f8fafc;
+    --text-muted: #8b949e;
+    
+    --theme-color: #8b5cf6; /* Default Purple from reference */
+}
+
+body[data-theme="general"] { --theme-color: #8b5cf6; } 
+body[data-theme="health"] { --theme-color: #10b981; } 
+body[data-theme="wealth"] { --theme-color: #f59e0b; } 
+body[data-theme="relations"] { --theme-color: #ec4899; } 
+body[data-theme="study"] { --theme-color: #3b82f6; } 
+body[data-theme="guest"] { --theme-color: #64748b; } 
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+}
+
+/* --- SIDEBAR --- */
+.floating-sidebar {
+    position: fixed;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #15161e;
+    border: 1px solid var(--card-border);
+    padding: 8px;
+    border-radius: 30px;
+    z-index: 100;
+}
+
+.nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover { background: rgba(255,255,255,0.05); }
+.nav-btn.active {
+    background: var(--theme-color);
+    color: #fff;
+    box-shadow: 0 0 15px var(--theme-color);
+}
+
+/* --- MECHANICAL SPHERE --- */
+.central-sphere-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.sphere {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+}
+
+.sphere-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, #fff 0%, var(--theme-color) 40%, #000 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 40px var(--theme-color), inset 0 0 20px #fff;
+    animation: corePulse 3s ease-in-out infinite alternate;
+}
+
+.mech-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+
+.ring-1 {
+    width: 280px; height: 280px;
+    border: 1px dashed rgba(255,255,255,0.3);
+    animation: spinRight 20s linear infinite;
+}
+
+.ring-2 {
+    width: 260px; height: 260px;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-top: 2px solid var(--theme-color);
+    border-bottom: 2px solid var(--theme-color);
+    animation: spinLeft 15s linear infinite;
+}
+
+.ring-3 {
+    width: 220px; height: 220px;
+    border: 2px dotted var(--theme-color);
+    animation: spinRight 10s linear infinite;
+}
+
+.sphere-label {
+    position: absolute;
+    bottom: -20px;
+    font-size: 10px;
+    letter-spacing: 8px;
+    color: var(--theme-color);
+    text-align: center;
+    width: 100%;
+}
+
+@keyframes spinRight { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes spinLeft { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+@keyframes corePulse { 0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.95); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } }
+
+/* --- 12x10 GRID SYSTEM --- */
+.pages-container {
+    width: calc(100vw - 70px);
+    height: 100vh;
+    padding: 15px;
+    position: relative;
+}
+
+.page {
+    width: 100%;
+    height: 100%;
+    display: none;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 12px;
+}
+
+.page.active { display: grid; }
+
+/* --- CARD WIDGETS --- */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.card.light {
+    background: var(--card-light-bg);
+    color: #000;
+}
+
+.card-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--theme-color);
+    margin-bottom: 8px;
+}
+
+.card h1 { font-size: 2.2rem; margin: 0; line-height: 1.1; }
+.card h2 { font-size: 1.5rem; margin: 0; line-height: 1.1; }
+.card.light h1, .card.light h2 { color: #000; }
+
+.sub-text { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* --- CHARTS & VISUALS --- */
+.ring-chart {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: conic-gradient(var(--theme-color) 75%, #2a2b36 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+}
+.ring-chart::after {
+    content: '';
+    width: 54px;
+    height: 54px;
+    background: var(--card-bg);
+    border-radius: 50%;
+    position: absolute;
+}
+
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 60px;
+    margin-top: auto;
+}
+.bar-chart .bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--theme-color), rgba(139, 92, 246, 0.3));
+    border-radius: 4px;
+}
+
+.vertical-progress {
+    width: 100%;
+    height: 100%;
+    background: #2a2b36;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+.vertical-progress .fill {
+    width: 100%;
+    background: linear-gradient(to top, var(--theme-color), rgba(139,92,246,0.4));
+    border-radius: 10px;
+}
+
+.list { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 5px; }
+.list li {
+    background: rgba(255,255,255,0.03);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.card.light .list li { background: #f1f5f9; color: #000; }
+
+svg.line-chart {
+    width: 100%;
+    height: 50px;
+    margin-top: auto;
+}

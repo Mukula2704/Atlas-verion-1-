@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS UI Demo V7 (Full 4-Page Sci-Fi Data Center)</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030304;
+            --surface: rgba(10, 10, 12, 0.65);
+            --border: rgba(255, 255, 255, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #555555;
+            --font-mono: 'JetBrains Mono', monospace;
+            --core-color: #ff2a2a; 
+            --core-glow: rgba(255, 42, 42, 0.5);
+            --bg-grid: rgba(255, 42, 42, 0.05);
+        }
+
+        body.page-1-active { --core-color: #ff2a2a; --core-glow: rgba(255, 42, 42, 0.5); --bg-grid: rgba(255, 42, 42, 0.05); }
+        body.page-2-active { --core-color: #00e5ff; --core-glow: rgba(0, 229, 255, 0.5); --bg-grid: rgba(0, 229, 255, 0.05); }
+        body.page-3-active { --core-color: #f0f0f0; --core-glow: rgba(240, 240, 240, 0.5); --bg-grid: rgba(240, 240, 240, 0.05); }
+        body.page-4-active { --core-color: #00ff66; --core-glow: rgba(0, 255, 102, 0.5); --bg-grid: rgba(0, 255, 102, 0.05); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.4s, color 0.4s, background 0.4s; }
+
+        body {
+            font-family: var(--font-mono); background-color: var(--bg); color: var(--text-main);
+            height: 100vh; width: 100vw; overflow: hidden; position: relative;
+            background-image: linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- BACKGROUND HUD OVERLAYS --- */
+        .hud-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+        .ax-x1 { position: absolute; top: 12%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); }
+        .ax-x2 { position: absolute; bottom: 12%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); }
+        .ax-y1 { position: absolute; top: 0; left: 15%; width: 1px; height: 100%; background: rgba(255,255,255,0.05); }
+        .ax-y2 { position: absolute; top: 0; right: 15%; width: 1px; height: 100%; background: rgba(255,255,255,0.05); }
+        
+        .radar { position: absolute; width: 120px; height: 120px; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; top: 3%; right: 3%; }
+        .radar-sweep { position: absolute; width: 50%; height: 50%; top: 0; right: 0; background: linear-gradient(45deg, transparent, var(--core-color)); transform-origin: bottom left; animation: radar 3s infinite linear; border-radius: 0 100% 0 0; opacity: 0.6; }
+        @keyframes radar { 100% { transform: rotate(360deg); } }
+
+        /* --- THE JARVIS CORE --- */
+        .core-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; }
+        .jarvis-core { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
+        .ring { position: absolute; border-radius: 50%; box-sizing: border-box; }
+        .ring-inner { width: 100px; height: 100px; background: radial-gradient(circle, var(--core-color) 40%, transparent 80%); box-shadow: 0 0 80px var(--core-glow); animation: pulse-core 1.5s infinite alternate ease-in-out; z-index: 10; }
+        .ring-middle { width: 190px; height: 190px; border: 2px dashed rgba(255,255,255,0.3); border-left: 3px solid var(--core-color); animation: spin 8s linear infinite; }
+        .ring-outer { width: 290px; height: 290px; border: 1px dotted rgba(255,255,255,0.2); border-top: 5px solid var(--core-color); border-bottom: 2px solid rgba(255,255,255,0.5); animation: spin-reverse 12s linear infinite; }
+        .core-bracket { position: absolute; width: 400px; height: 400px; border: 1px solid transparent; z-index: 5; }
+        .bracket-l { border-left: 1px solid var(--text-muted); border-top: 1px solid var(--text-muted); clip-path: polygon(0 0, 15% 0, 15% 5%, 5% 5%, 5% 15%, 0 15%); }
+        .bracket-r { border-right: 1px solid var(--text-muted); border-bottom: 1px solid var(--text-muted); clip-path: polygon(100% 100%, 85% 100%, 85% 95%, 95% 95%, 95% 85%, 100% 85%); }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes pulse-core { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.2); opacity: 1; } }
+
+        /* --- PAGES & PANELS --- */
+        .hud-wrapper { position: relative; width: 100vw; height: 100vh; z-index: 10; }
+        .page { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .page.active { opacity: 1; pointer-events: all; }
+
+        .panel {
+            position: absolute; background: var(--surface); backdrop-filter: blur(8px);
+            border: 1px solid var(--border); padding: 15px; display: flex; flex-direction: column;
+            overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+        }
+        .panel-header { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: var(--core-color); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .panel-header::after { content: ''; flex-grow: 1; height: 1px; background: rgba(255,255,255,0.2); margin-left: 10px; }
+
+        .data-small { font-size: 0.6rem; color: var(--text-muted); }
+        .data-mid { font-size: 1rem; color: var(--text-main); font-weight: 700; }
+        .data-huge { font-size: 2.2rem; color: var(--text-main); font-weight: 300; line-height: 1; }
+        .data-accent { color: var(--core-color); font-weight: 700; }
+
+        /* Fake CSS Graphs */
+        .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; margin-top: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .bar { width: 12px; background: var(--text-muted); border-radius: 2px 2px 0 0; }
+        .bar.active { background: var(--core-color); box-shadow: 0 0 10px var(--core-color); }
+        .bar.high { background: #fff; }
+
+        .line-chart { width: 100%; height: 50px; margin-top: 10px; position: relative; border-left: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .svg-line { width: 100%; height: 100%; stroke: var(--core-color); stroke-width: 2; fill: none; filter: drop-shadow(0 0 5px var(--core-glow)); }
+
+        /* ====================================================
+           PAGE 1: PHYSICAL (Extreme Asymmetry + Health Graphs)
+           ==================================================== */
+        #page-1 .f-steps { top: 6%; left: 3%; width: 18%; height: 28%; clip-path: polygon(0 0, 100% 0, 100% 80%, 90% 100%, 0 100%); border-top: 3px solid var(--core-color); }
+        #page-1 .f-hrv { top: 38%; left: 1%; width: 20%; height: 20%; border-right: 3px solid var(--core-color); background: rgba(255,42,42,0.05); }
+        #page-1 .f-sleep { bottom: 8%; left: 4%; width: 30%; height: 25%; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 25%); border-bottom: 2px solid rgba(255,255,255,0.3); }
+        
+        #page-1 .f-gym { top: 5%; right: 28%; width: 16%; height: 55%; border: 1px solid var(--core-color); border-bottom: none; }
+        #page-1 .f-hr { top: 8%; right: 3%; width: 22%; height: 18%; clip-path: polygon(0 0, 90% 0, 100% 20%, 100% 100%, 0 100%); }
+        #page-1 .f-nutrition { bottom: 6%; right: 4%; width: 40%; height: 28%; clip-path: polygon(0 15%, 15% 0, 100% 0, 100% 100%, 0 100%); border-top: 1px solid var(--core-color); }
+
+        /* ====================================================
+           PAGE 2: WORKSPACE (Focus/Study - Different Layout)
+           ==================================================== */
+        #page-2 .f-focus { top: 5%; left: 20%; width: 60%; height: 18%; border-bottom: 4px solid var(--core-color); background: rgba(0, 229, 255, 0.05); display: flex; flex-direction: row; justify-content: space-between; align-items: center; }
+        #page-2 .f-tasks { top: 28%; left: 4%; width: 25%; height: 65%; clip-path: polygon(0 0, 100% 0, 100% 90%, 85% 100%, 0 100%); border-left: 2px solid var(--core-color); }
+        #page-2 .f-blocks { top: 28%; right: 4%; width: 25%; height: 40%; border-right: 3px solid var(--core-color); }
+        #page-2 .f-deepwork { bottom: 6%; right: 8%; width: 35%; height: 25%; clip-path: polygon(0 20%, 10% 0, 100% 0, 100% 100%, 0 100%); }
+
+        /* ====================================================
+           PAGE 3: PERSONAL (Journal/Life - Clean, Vast Layout)
+           ==================================================== */
+        #page-3 .f-journal { top: 8%; left: 8%; width: 35%; height: 80%; border-left: 1px solid var(--core-color); border-top: 1px solid var(--core-color); padding: 40px; background: rgba(255,255,255,0.02); }
+        #page-3 .f-reminders { top: 10%; right: 8%; width: 25%; height: 50%; clip-path: polygon(0 0, 100% 0, 100% 100%, 20% 100%, 0 85%); border-bottom: 3px solid var(--core-color); }
+        #page-3 .f-quote { bottom: 10%; right: 10%; width: 40%; height: 20%; border: none; background: transparent; border-right: 4px solid var(--core-color); text-align: right; }
+
+        /* ====================================================
+           PAGE 4: OPS & INTELLIGENCE (Matrix/Finance - Dense)
+           ==================================================== */
+        #page-4 .f-finance { top: 5%; left: 2%; width: 22%; height: 60%; border-left: 4px solid var(--core-color); background: rgba(0, 255, 102, 0.05); }
+        #page-4 .f-market { top: 5%; right: 20%; width: 30%; height: 40%; clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%, 0 85%); border-bottom: 2px solid var(--core-color); }
+        #page-4 .f-crawlers { top: 5%; right: 2%; width: 16%; height: 90%; border-right: 1px dashed rgba(255,255,255,0.3); }
+        #page-4 .f-income { bottom: 5%; left: 5%; width: 45%; height: 28%; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 25%); border-top: 1px solid var(--core-color); }
+
+
+        /* --- UI CONTROLS (Floating Footer) --- */
+        .controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 200; }
+        button {
+            padding: 8px 15px; background: rgba(0,0,0,0.8); border: 1px solid var(--border); color: rgba(255,255,255,0.5);
+            font-family: var(--font-mono); font-size: 0.6rem; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+        }
+        button.active-btn { border-color: var(--core-color); color: var(--core-color); box-shadow: 0 0 10px var(--core-glow); }
+        button:hover { color: #fff; border-color: #fff; }
+        
+    </style>
+</head>
+<body class="page-1-active">
+
+    <div class="hud-overlay">
+        <div class="ax-x1"></div><div class="ax-x2"></div><div class="ax-y1"></div><div class="ax-y2"></div>
+        <div class="radar"><div class="radar-sweep"></div></div>
+    </div>
+
+    <div class="core-container">
+        <div class="jarvis-core">
+            <div class="ring ring-orbit"></div><div class="ring ring-outer"></div><div class="ring ring-middle"></div><div class="ring ring-inner"></div>
+            <div class="core-bracket bracket-l"></div><div class="core-bracket bracket-r"></div>
+        </div>
+        <div style="margin-top: 45px; font-size: 0.7rem; color: var(--core-color); letter-spacing: 8px; text-transform: uppercase;" id="core-text">PHYSICAL_ARCHITECT</div>
+    </div>
+
+    <div class="hud-wrapper">
+        
+        <!-- ================= PAGE 1 ================= -->
+        <div class="page active" id="page-1">
+            <div class="panel f-steps">
+                <div class="panel-header">STEP_HISTORY</div>
+                <div class="data-huge">8,402</div>
+                <div class="bar-chart">
+                    <div class="bar" style="height: 30%"></div>
+                    <div class="bar" style="height: 50%"></div>
+                    <div class="bar" style="height: 40%"></div>
+                    <div class="bar high" style="height: 90%"></div>
+                    <div class="bar" style="height: 60%"></div>
+                    <div class="bar active" style="height: 75%"></div>
+                </div>
+            </div>
+            <div class="panel f-hrv">
+                <div class="panel-header">HRV_INDEX</div>
+                <div class="data-huge">42<span style="font-size:1rem">ms</span></div>
+                <div class="line-chart">
+                    <svg viewBox="0 0 100 30" class="svg-line"><path d="M0,15 L20,10 L40,25 L60,5 L80,20 L100,15" /></svg>
+                </div>
+            </div>
+            <div class="panel f-sleep">
+                <div class="panel-header">SLEEP_ARCHITECTURE</div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div>
+                        <div class="data-small">TOTAL DURATION</div>
+                        <div class="data-huge">7H 24M</div>
+                    </div>
+                    <div>
+                        <div class="data-small">DEEP SLEEP</div>
+                        <div class="data-mid data-accent">2H 15M</div>
+                    </div>
+                </div>
+                <div style="width:100%; height:8px; display:flex; margin-top:15px; border-radius:4px; overflow:hidden;">
+                    <div style="width:15%; background:rgba(255,255,255,0.2);"></div>
+                    <div style="width:30%; background:var(--core-color);"></div>
+                    <div style="width:45%; background:rgba(255,255,255,0.5);"></div>
+                    <div style="width:10%; background:#fff;"></div>
+                </div>
+            </div>
+            <div class="panel f-gym">
+                <div class="panel-header" style="background:var(--core-color); color:#000; padding:2px 5px;">GYM_MATRIX</div>
+                <div class="data-mid data-accent" style="margin-top:10px;">PUSH_DAY</div>
+                <div class="data-small">> Upper Chest Bias</div>
+                <div class="data-small" style="color:var(--text-main); margin-top:15px; line-height:2;">
+                    [1] Incline DB Press<br>[2] Overhead Press<br>[3] Triceps Ext.<br>[4] Lateral Raises
+                </div>
+            </div>
+            <div class="panel f-hr">
+                <div class="panel-header">LIVE_BPM</div>
+                <div class="data-huge data-accent" style="text-align:right;">62</div>
+            </div>
+            <div class="panel f-nutrition">
+                <div class="panel-header">MACRO_INTAKE</div>
+                <div style="display:flex; justify-content:space-around; text-align:center;">
+                    <div><div class="data-small">PROTEIN</div><div class="data-huge data-accent">145g</div></div>
+                    <div><div class="data-small">CARBS</div><div class="data-huge">200g</div></div>
+                    <div><div class="data-small">FATS</div><div class="data-huge">65g</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 2 ================= -->
+        <div class="page" id="page-2">
+            <div class="panel f-focus">
+                <div>
+                    <div class="panel-header">FOCUS_TIMER</div>
+                    <div class="data-small">SYSTEM LOCK ENGAGED</div>
+                </div>
+                <div class="data-huge" style="font-size:4rem;">01:45:00</div>
+            </div>
+            <div class="panel f-tasks">
+                <div class="panel-header">ACTIVE_ROUTING (TASKS)</div>
+                <ul style="list-style: none; margin-top:10px;" class="data-mono">
+                    <li style="margin-bottom:15px;">> [ ] Review Modern History notes</li>
+                    <li style="margin-bottom:15px;">> [ ] Practice 50 Polity MCQs</li>
+                    <li style="margin-bottom:15px; color:var(--core-color);">> [X] Refactor UI Logic</li>
+                </ul>
+            </div>
+            <div class="panel f-blocks">
+                <div class="panel-header">TODAYS_BLOCKS</div>
+                <div style="border-left:3px solid var(--core-color); padding-left:15px; margin-top:10px;">
+                    <div class="data-mid">CDS Prep</div>
+                    <div class="data-small">History & Polity (Active Recall)</div>
+                </div>
+            </div>
+            <div class="panel f-deepwork">
+                <div class="panel-header">DEEP_WORK_HISTORY</div>
+                <div class="bar-chart" style="height: 100px;">
+                    <div class="bar" style="height: 20%"></div>
+                    <div class="bar" style="height: 40%"></div>
+                    <div class="bar" style="height: 80%"></div>
+                    <div class="bar" style="height: 60%"></div>
+                    <div class="bar high" style="height: 100%"></div>
+                    <div class="bar" style="height: 50%"></div>
+                    <div class="bar active" style="height: 90%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 3 ================= -->
+        <div class="page" id="page-3">
+            <div class="panel f-journal">
+                <div class="panel-header">THE_PENSIEVE</div>
+                <div style="font-family: var(--font-serif); font-size: 2.5rem; margin-top:20px; line-height: 1.2;">"The new ATLAS dashboard is coming together. Extreme asymmetry."</div>
+                <div style="margin-top:40px; font-size:0.8rem; color:var(--core-color);">> AWAITING INPUT STREAM...</div>
+            </div>
+            <div class="panel f-reminders">
+                <div class="panel-header">SYS_REMINDERS</div>
+                <ul style="list-style: none; margin-top:15px;" class="data-mono">
+                    <li style="margin-bottom:10px;">> Order Swiggy Instamart</li>
+                    <li style="margin-bottom:10px;">> Update Mac Server packages</li>
+                    <li style="margin-bottom:10px;">> Call Dad</li>
+                </ul>
+            </div>
+            <div class="panel f-quote">
+                <div class="panel-header" style="justify-content: flex-end;">DAILY_OVERRIDE</div>
+                <div style="font-family: var(--font-serif); font-size: 2rem; color:var(--core-color); margin-top:10px;">"Discipline equals freedom. Do the work."</div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 4 ================= -->
+        <div class="page" id="page-4">
+            <div class="panel f-finance">
+                <div class="panel-header">FINANCIAL_SNIPER</div>
+                <div class="data-small">CURRENT LIQUIDITY</div>
+                <div class="data-huge" style="margin-bottom: 20px;">₹12,450</div>
+                <div class="data-small">> Next EMI: ₹4,500 (5 Days)</div>
+                <div class="line-chart" style="margin-top: 30px; height: 100px;">
+                    <svg viewBox="0 0 100 50" class="svg-line"><path d="M0,45 L20,40 L40,42 L60,25 L80,30 L100,5" /></svg>
+                </div>
+            </div>
+            <div class="panel f-income">
+                <div class="panel-header">INCOME_ROUTING</div>
+                <div style="display:flex; justify-content:space-around; align-items:center; height:100%;">
+                    <div style="text-align:center;">
+                        <div class="data-small">FREELANCE</div>
+                        <div class="data-huge data-accent">₹12,450</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="data-small">DIVIDENDS</div>
+                        <div class="data-huge">₹1,200</div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel f-market">
+                <div class="panel-header">MARKET_SENTINEL</div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                    <span class="data-mono">NIFTY 50:</span> <strong class="data-accent">+0.45%</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                    <span class="data-mono">BTC/USD:</span> <strong style="color:red">-1.20%</strong>
+                </div>
+            </div>
+            <div class="panel f-crawlers">
+                <div class="panel-header">HN_STREAM</div>
+                <div class="data-mono" style="font-size:0.65rem; line-height: 1.8;">
+                    > Show HN: A new framework for local LLM agents.<br><br>
+                    > Ask HN: How do you manage personal dashboards?<br><br>
+                    > OpenAI releases new TTS latency models.<br>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UI PAGINATION CONTROLS -->
+    <div class="controls">
+        <button id="btn-1" class="active-btn" onclick="changePage(1)">[1] Physical</button>
+        <button id="btn-2" onclick="changePage(2)">[2] Workspace</button>
+        <button id="btn-3" onclick="changePage(3)">[3] Personal</button>
+        <button id="btn-4" onclick="changePage(4)">[4] Intel</button>
+    </div>
+
+    <script>
+        function changePage(pageNum) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageNum).classList.add('active');
+            
+            document.body.className = '';
+            document.body.classList.add('page-' + pageNum + '-active');
+
+            document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active-btn'));
+            document.getElementById('btn-' + pageNum).classList.add('active-btn');
+
+            const labels = {1: "PHYSICAL_ARCHITECT", 2: "WORKSPACE_ARCHITECT", 3: "PERSONAL_GROWTH", 4: "OPS_INTELLIGENCE"};
+            document.getElementById('core-text').innerText = labels[pageNum];
+        }
+    </script>
+</body>
+</html>

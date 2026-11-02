@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS Masterplan: Project Friday</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface: rgba(18, 22, 28, 0.75);
+            --surface-hover: rgba(26, 32, 40, 0.95);
+            --accent-red: #ff2a2a;
+            --accent-gold: #d4af37;
+            --accent-blue: #45f3ff;
+            --text-main: #e2e8f0;
+            --text-muted: #8b949e;
+            --border-color: rgba(255,255,255,0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            padding: 50px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 42, 42, 0.03), transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(69, 243, 255, 0.03), transparent 30%);
+            background-attachment: fixed;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 70px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--accent-red);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 25px rgba(255, 42, 42, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            color: var(--accent-blue);
+            margin: 60px 0 30px 0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .section-title::after {
+            content: '';
+            height: 1px;
+            flex-grow: 1;
+            background: linear-gradient(to right, var(--accent-blue), transparent);
+            opacity: 0.3;
+        }
+
+        /* Topography Grid */
+        .topo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .topo-node {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topo-node.brain {
+            border-color: rgba(255, 42, 42, 0.4);
+            box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.05);
+        }
+
+        .topo-node h4 {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .topo-node.brain h4 {
+            color: var(--accent-red);
+        }
+
+        .topo-node p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Glassmorphism Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            background: var(--surface-hover);
+        }
+
+        .card h3 {
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: #b0bac5;
+            margin-bottom: 15px;
+        }
+
+        .card ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .card li {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .card li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+        }
+
+        .hardware-badge {
+            display: inline-block;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            background: rgba(69, 243, 255, 0.08);
+            color: var(--accent-blue);
+            border: 1px solid rgba(69, 243, 255, 0.2);
+            border-radius: 6px;
+            margin-right: 8px;
+            margin-top: 10px;
+        }
+        
+        .hardware-badge.primary {
+            background: rgba(255, 42, 42, 0.08);
+            color: var(--accent-red);
+            border-color: rgba(255, 42, 42, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ATLAS MASTERPLAN</h1>
+        <p>The Definitive Architectural Blueprint for Project Friday.<br>A fully autonomous, multi-node personal assistant operating across Edge, Mobile, and Cloud.</p>
+    </div>
+
+    <h2 class="section-title">1. Hardware Topology (The Swarm)</h2>
+    <div class="topo-grid">
+        <div class="topo-node brain">
+            <h4>MacBook (The Brain) <span class="status-dot"></span></h4>
+            <p>Ubuntu Server docked under the desk. Handles LLM inference, heavy Python processing, Selenium Web Automation (Swiggy/Amazon), and WhatsApp Web messaging.</p>
+        </div>
+        <div class="topo-node">
+            <h4>iQOO (Primary Powerhouse)</h4>
+            <p>Holds the SIM. Runs MacroDroid Pro. Handles SMS interception, GPS location pinging, and acts as the ultimate failsafe to execute basic logic if the Mac loses power.</p>
+        </div>
+        <div class="topo-node">
+            <h4>Samsung (Silent Node)</h4>
+            <p>Secondary phone running MacroDroid in the background. Exclusively dedicated to opening and scraping Huawei Health biometrics so the primary iQOO is never interrupted.</p>
+        </div>
+        <div class="topo-node">
+            <h4>Lenovo Tab (Dashboard)</h4>
+            <p>Wall-mounted, Always-On HTML interface reading directly from Firebase websockets.</p>
+        </div>
+        <div class="topo-node">
+            <h4>Discord (Pager)</h4>
+            <p>The human-in-the-loop approval layer. ATLAS routes critical questions here for simple Yes/No confirmation.</p>
+        </div>
+        <div class="topo-node">
+            <h4>Desk Sensors</h4>
+            <p><strong>Logitech Webcam:</strong> The Eyes. Feeds frame data to Mac.<br><strong>Bluetooth Speaker:</strong> The Voice. Plays TTS and alarms.</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">2. Procurement & Financial Core</h2>
+    <div class="feature-grid">
+        <div class="card">
+            <h3>Financial Sniper</h3>
+            <p>Monitors spending and flags due bills before they become a problem.</p>
+            <ul>
+                <li>iQOO intercepts Bank SMS via MacroDroid and sends to Firebase.</li>
+                <li>Mac calculates current budget against EMIs and pushes alerts to Discord.</li>
+            </ul>
+            <span class="hardware-badge">iQOO</span><span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>The Market Sentinel</h3>
+            <p>Watches for micro-investment opportunities.</p>
+            <ul>
+                <li>Mac checks stock/crypto APIs against your free budget.</li>
+                <li>If the market drops, it pings Discord asking to deploy capital.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span><span class="hardware-badge">Discord</span>
+        </div>
+        <div class="card">
+            <h3>Autonomous Procurement</h3>
+            <p>Zero-touch ordering using headless web browsers.</p>
+            <ul>
+                <li>When approved on Discord, Mac spins up a Selenium/Playwright browser to physically click through Swiggy/Amazon/Blinkit and place the order.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac (Web Automation)</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">3. Health, Social, & The "Oracle"</h2>
+    <div class="feature-grid">
+        <div class="card">
+            <h3>The Sherlock Module (Dual Sync)</h3>
+            <p>The silent biometric scraper.</p>
+            <ul>
+                <li>Samsung opens Huawei Health silently in the background.</li>
+                <li>Scrapes both your HRV/Sleep data AND your GF's data, writing to Firebase.</li>
+            </ul>
+            <span class="hardware-badge">Samsung</span>
+        </div>
+        <div class="card">
+            <h3>The Oracle & Ghost Protocol</h3>
+            <p>Health-based meeting intervention.</p>
+            <ul>
+                <li>Mac detects your HRV has crashed for 48 hours via Sherlock data.</li>
+                <li>Auto-cancels non-essential meetings using the Gmail API to force a recovery day.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>Inner Circle Synthesizer</h3>
+            <p>Predictive relationship management.</p>
+            <ul>
+                <li>Cross-references GF's sleep/HRV with her recent WhatsApp/Signal texts.</li>
+                <li>If stressed, drafts a comforting text and sends it via WhatsApp Web on the Mac.</li>
+                <li>Can trigger Procurement to auto-order flowers.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac (WhatsApp Web)</span>
+        </div>
+        <div class="card">
+            <h3>The Blood Architect</h3>
+            <p>Dietary realignment based on medical data.</p>
+            <ul>
+                <li>You upload a PDF blood test. ATLAS parses deficiencies (e.g., Low B12).</li>
+                <li>Alters daily macros and tells Procurement to buy corrective groceries.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>Bio-Rhythm DJ</h3>
+            <p>Mood-based environmental audio.</p>
+            <ul>
+                <li>Reads live HRV. If stressed, switches the Bluetooth speaker to ambient focus music to lower heart rate.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span><span class="hardware-badge">Speaker</span>
+        </div>
+        <div class="card">
+            <h3>Auto-Negotiator & Diplomat</h3>
+            <p>Social offloading.</p>
+            <ul>
+                <li>Reads incoming customer service or formal emails.</li>
+                <li>Drafts polite, optimized replies and waits for your Discord approval to send.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">4. The Omnipresent Vision Engine</h2>
+    <div class="feature-grid">
+        <div class="card">
+            <h3>Posture & Burnout Monitor</h3>
+            <p>Skeletal tracking and fatigue detection.</p>
+            <ul>
+                <li><strong>Posture:</strong> MediaPipe maps your skeleton. Audio ping if slouching >15 mins.</li>
+                <li><strong>Gaming/Burnout:</strong> Detects a game controller or aggressive mouse use >2hrs. Pings Speaker: "Suggesting a 10-minute break."</li>
+            </ul>
+            <span class="hardware-badge">Webcam</span><span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>Deep Work Jammer (Focus Mode)</h3>
+            <p>Automatic environment tuning.</p>
+            <ul>
+                <li>If camera detects you reading a book, soldering, or deeply focused on code (low movement, intense staring), ATLAS automatically enters Focus Mode.</li>
+                <li>Mutes non-critical Discord pings and lowers speaker volume.</li>
+            </ul>
+            <span class="hardware-badge">Webcam</span><span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>Nutrition Logger & Remote Fallback</h3>
+            <p>Automated macro tracking.</p>
+            <ul>
+                <li><strong>Local:</strong> Detects eating at desk. Pings Speaker: "Please send photo to Discord."</li>
+                <li><strong>Remote:</strong> If away from home, simply send a food pic to Discord. ATLAS knows you're eating out and logs it automatically without webcam context.</li>
+            </ul>
+            <span class="hardware-badge">Webcam</span><span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>Habit & Hydration Tracker</h3>
+            <p>Physical object and routine detection.</p>
+            <ul>
+                <li><strong>Skincare/Serum:</strong> If internal clock hits 10:00 AM and webcam hasn't seen you apply face serum, ATLAS actively reminds you.</li>
+                <li><strong>Hydration:</strong> Recognizes your specific water bottle. If level hasn't changed in 3 hours, ATLAS reminds you to hydrate.</li>
+            </ul>
+            <span class="hardware-badge">Webcam</span><span class="hardware-badge primary">Mac</span>
+        </div>
+        
+        <div class="card">
+            <h3>Sleep Hygiene & Wind Down</h3>
+            <p>Late-night intervention.</p>
+            <ul>
+                <li>If you are still sitting at the desk at 2:00 AM, the camera triggers the Wind Down Protocol.</li>
+                <li>Pings Speaker: "Mukul, it's 2 AM. You have meetings tomorrow. I am dimming the dashboard."</li>
+            </ul>
+            <span class="hardware-badge">Webcam</span><span class="hardware-badge primary">Mac</span>
+        </div>
+
+        <div class="card">
+            <h3>Workspace Architect (OCR)</h3>
+            <p>Multilingual desk transcription.</p>
+            <ul>
+                <li>Place a handwritten note (Hindi, Kannada, English) on your desk.</li>
+                <li>Webcam scans, translates, and sends items directly to Procurement.</li>
+            </ul>
+            <span class="hardware-badge">Webcam</span><span class="hardware-badge primary">Mac</span>
+        </div>
+
+        <div class="card">
+            <h3>Unkillable Alarm</h3>
+            <p>Physical presence verification.</p>
+            <ul>
+                <li>Morning alarm plays through Speaker at 8:00 AM.</li>
+                <li><strong>Primary Shutoff:</strong> ONLY stops when webcam physically sees you out of bed and sitting at your desk.</li>
+                <li><strong>Voice Failsafe:</strong> If camera fails/face is puffy, use Voice Command: "Hey Atlas, thanks for waking me up, give me morning news and briefing" to override the alarm.</li>
+            </ul>
+            <span class="hardware-badge">Webcam</span><span class="hardware-badge primary">Mac</span><span class="hardware-badge">Speaker</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">5. Core Memory & Remote AI Edge</h2>
+    <div class="feature-grid">
+        <div class="card">
+            <h3>The Pensieve (Memory)</h3>
+            <p>The foundational semantic context engine.</p>
+            <ul>
+                <li>Local Vector/SQLite database on the Mac.</li>
+                <li>Stores every text, argument, and health metric to give ATLAS deep contextual awareness over years.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>Shadow Learner & Devil's Advocate</h3>
+            <p>Automated study architecture.</p>
+            <ul>
+                <li>Parses curriculum PDFs to create flashcards.</li>
+                <li>Aggressively interrupts you via Speaker with Active-Recall questions.</li>
+                <li>Math engine self-heals your calendar if you miss study blocks.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>The Autonomous Scribe (Browser Audio)</h3>
+            <p>Lecture transcription from anywhere.</p>
+            <ul>
+                <li>Toggle button on the ATLAS HTML Dashboard (accessible from any device browser).</li>
+                <li>Records meeting audio using Web MediaRecorder API.</li>
+                <li>Auto-stops at end of meeting, uploads blob to Mac for transcription and quiz generation.</li>
+            </ul>
+            <span class="hardware-badge">Web Browser</span><span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>Live AI Voicemail (Voice Bot)</h3>
+            <p>Intelligent call screening.</p>
+            <ul>
+                <li>Unanswered iQOO calls forward to a Twilio virtual number (or API equivalent).</li>
+                <li>Live Gemini Voice Bot answers, converses with the caller, and screens for importance.</li>
+                <li>If urgent, routes message to Discord; if spam, instantly hangs up.</li>
+            </ul>
+            <span class="hardware-badge">iQOO</span><span class="hardware-badge primary">Mac (Twilio/Voice)</span>
+        </div>
+        <div class="card">
+            <h3>The Phantom Coder & Auto-Archivist</h3>
+            <p>IDE integration.</p>
+            <ul>
+                <li>Monitors code saves and clipboard (`//ai-fix`).</li>
+                <li>Real-time bug detection and code rewrite suggestions.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span>
+        </div>
+        <div class="card">
+            <h3>The Aegis Shield</h3>
+            <p>Family security.</p>
+            <ul>
+                <li>Scrapes Dark-Web APIs. Drafts warning texts to family if breaches occur.</li>
+            </ul>
+            <span class="hardware-badge primary">Mac</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">6. Self-Healing Calendar</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">Dynamic Math Engine</h3>
+        <p>This module dynamically recalculates your daily required hours based on your Voice Logs.</p>
+        
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px;">▼ Manual Override (Library Mode)</div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="shcGoal" placeholder="Goal (e.g. Physics Final)" style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white;">
+                <input type="number" id="shcHours" placeholder="Total Hrs" style="width: 100px; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white;">
+                <input type="number" id="shcDays" placeholder="Days Left" style="width: 100px; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white;">
+            </div>
+            <button id="btnInitCalendar" style="background: var(--accent-blue); color: black; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Initialize Goal</button>
+            
+            <hr style="border-color: var(--border-color); margin: 10px 0;">
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="number" id="shcLogHours" placeholder="Hrs studied today" style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white;">
+                <button id="btnLogProgress" style="background: var(--accent-gold); color: black; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">Log & Recalculate</button>
+            </div>
+            
+            <div id="shcOutput" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.8); border: 1px dashed var(--accent-red); border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.9rem; color: #00ff00; white-space: pre-wrap; min-height: 100px;">
+Waiting for goal initialization...
+            </div>
+        </div>
+    </div>
+    
+    <h2 class="section-title">7. The Debate Engine (Supervisor Node)</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-red);">Swarm Critique Protocol</h3>
+        <p>Speak a complex task to ATLAS. It will delegate to the Swarm, ruthlessly critique their first draft, and return the refined output via voice/Discord.</p>
+        
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px;">▼ Manual Override (Library Mode)</div>
+            <textarea id="debateInput" rows="3" placeholder="e.g. Draft a 5-step strategy to transition into IT sales for my business target." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white; resize: vertical;"></textarea>
+            <button id="btnStartDebate" style="background: var(--accent-red); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;">Initiate Debate Protocol</button>
+            
+            <div id="debateOutput" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.9rem; color: var(--text-main); white-space: pre-wrap; min-height: 150px;">
+System ready. Awaiting task input.
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">8. Phantom Coder</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">AI Pair Programmer (Live File Monitor)</h3>
+        <p>Runs silently in the background on your primary laptop, analyzing the code you write in real-time. If you write a bug, it will scream at you.</p>
+        
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <span style="font-weight: bold; color: var(--text-main);">Phantom Daemon Status:</span>
+                <span style="color: #00ff00; font-weight: bold; text-shadow: 0 0 5px #00ff00;">● ONLINE</span>
+            </div>
+            
+            <div id="phantomOutput" style="margin-top: 5px; padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.9rem; color: var(--text-muted); white-space: pre-wrap; min-height: 120px; max-height: 200px; overflow-y: auto;">
+[PHANTOM] Initializing... Monitoring directory: C:/Users/mukul/comand-center
+[PHANTOM] Waiting for you to save a file...
+            </div>
+            <button id="btnSimulatePhantom" style="background: var(--surface); color: white; border: 1px dashed var(--border-color); padding: 8px; border-radius: 8px; cursor: pointer;">Simulate Bug Detection</button>
+        </div>
+    </div>
+
+    <h2 class="section-title">9. Autonomous Procurement Engine</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-gold);">Smart Quick-Commerce Router</h3>
+        <p>ATLAS listens to your voice command (e.g. "Order 1kg sugar"), controls your Samsung phone to scrape Zepto, Blinkit, and Amazon, builds the cheapest cart, and pings your primary phone for UPI payment.</p>
+        
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px;">▼ Manual Override (Library Mode)</div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="procureInput" placeholder="e.g. 1kg sugar and 1kg atta" style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white;">
+                <button id="btnStartProcurement" style="background: var(--accent-gold); color: black; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">Find Cheapest</button>
+            </div>
+            
+            <div id="procureOutput" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.9rem; color: var(--text-main); white-space: pre-wrap; min-height: 150px;">
+Awaiting procurement request...
+            </div>
+            
+            <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <span style="font-size: 0.9rem; color: var(--text-muted);">Current Location Status: </span>
+                <span style="color: #00ff00; font-size: 0.9rem;">Default (Home Base)</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">10. AI Voicemail & Call Screener</h2>
+    <div class="card" style="margin-bottom: 20px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">The Gatekeeper</h3>
+        <p>ATLAS intercepts unknown callers on your phone, speaks to them using your custom AI voice, transcribes their intent, and pings you on Discord to decide if you want to pick up.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <span style="color: #00ff00; font-size: 0.9rem;">● Call Forwarding Active (Via Samsung MacroDroid)</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">11. The Financial Sniper</h2>
+    <div class="card" style="margin-bottom: 20px; max-width: 600px;">
+        <h3 style="color: var(--accent-gold);">₹12 Cr Target Tracker</h3>
+        <p>You speak your expenses/income out loud ("ATLAS, I just spent ₹500 on lunch"). ATLAS logs it, categorizes it, and maps it against your ultimate ₹12 Crore per annum business target.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px;">▼ Manual Override (Library Mode)</div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="number" placeholder="₹ Amount" style="width: 100px; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); color: white;">
+                <input type="text" placeholder="Expense description..." style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); color: white;">
+                <button style="background: var(--surface); color: white; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px; cursor: pointer;">Log</button>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">12. Constant GPS & Situational Awareness</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-red);">Omni-Presence Matrix</h3>
+        <p>ATLAS tracks your live location via your phone. When you say "Hey ATLAS, what's around here?" it already knows if you are at a friend's house, a library, or a new city, and adjusts its answers accordingly.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <span style="color: #00ff00; font-size: 0.9rem;">● Live Tracking: ON (Accuracy: ~5m)</span><br>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Last Ping: 12 seconds ago</span>
+        </div>
+    <h2 class="section-title">13. The Pantry Module & Autopilot Nutritionist</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: #00ff00;">Family (+2) Logistics & Junk Detection</h3>
+        <p>ATLAS tracks daily essentials (Milk, Curd, Veggies) and automatically builds Blinkit carts for the cheapest options when low. It tracks your 120-130g protein goal. If the camera or Vision AI detects junk food cravings (chips/soda), ATLAS triggers an intervention.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px;">
+                <span style="color: var(--text-muted);">Milk (Family): </span><span style="color: white;">2.5L</span> <span style="color: #00ff00; font-size: 0.8rem;">[STABLE]</span><br>
+                <span style="color: var(--text-muted);">Curd: </span><span style="color: white;">1.0KG</span> <span style="color: #00ff00; font-size: 0.8rem;">[STABLE]</span><br>
+                <span style="color: var(--text-muted);">Protein Target: </span><span style="color: var(--accent-gold);">130g</span> <span style="color: #00ff00; font-size: 0.8rem;">[ON TRACK]</span>
+            </div>
+            <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <span style="color: var(--accent-red); font-size: 0.8rem;">⚠️ JUNK STRIKES (90-DAY PROTOCOL): </span><span style="color: white; font-size: 0.9rem;">0</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">14. Multilingual OCR & Workspace Scanner</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">Desk Mat Intelligence</h3>
+        <p>ATLAS uses the Logitech webcam to scan physical, handwritten notes placed on your desk mat. It automatically translates Hindi, Kannada, and English, reads the items out loud to confirm, and pushes them into the Procurement Engine.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px;">
+                <span style="color: var(--text-muted);">Camera Status: </span><span style="color: #00ff00;">SCANNER MODE READY</span>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button style="background: var(--surface); color: white; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px; cursor: pointer; flex: 1;">Trigger Manual Scan</button>
+            </div>
+            <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">Last Scanned List: [1kg Tomatoes, 2L Milk] -> Pushed to Cart</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">15. The Sherlock Module</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-gold);">Biometric & Physical Context Scraper</h3>
+        <p>ATLAS silently runs on your secondary Samsung phone to scrape your Huawei Health data (HRV, Sleep, Workouts) without duplicating apps. This biometric data is fed into the Master Context so ATLAS knows when you are exhausted or over-trained.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Latest Huawei Health Ping: <span style="color: white;">4 mins ago</span></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--accent-gold); font-size: 0.8rem; text-transform: uppercase;">HRV</div>
+                    <div style="font-size: 1.2rem; color: white;">68 ms</div>
+                </div>
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--accent-blue); font-size: 0.8rem; text-transform: uppercase;">Sleep Score</div>
+                    <div style="font-size: 1.2rem; color: white;">82</div>
+                </div>
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--accent-red); font-size: 0.8rem; text-transform: uppercase;">Readiness</div>
+                    <div style="font-size: 1.2rem; color: #00ff00;">OPTIMAL</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">16. The Inner Circle (Girlfriend Matrix)</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-gold);">Predictive Empathy Engine</h3>
+        <p>ATLAS cross-references your partner's biometric data (scraped via Huawei Health) with incoming Signal/WhatsApp notifications to predict friction. If stress is high and texts are cold, it proactively suggests comforting texts or triggers headless chocolate deliveries.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Partner HRV</div>
+                    <div style="font-size: 1.2rem; color: white;">42 ms</div>
+                </div>
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Partner Sleep</div>
+                    <div style="font-size: 1.2rem; color: var(--accent-red);">5.2 hr</div>
+                </div>
+            </div>
+            <div style="border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">LATEST TEXT ANALYSIS:</span><br>
+                <span style="color: var(--accent-red); font-size: 0.9rem;">⚠️ RISK LEVEL: EXTREME</span><br>
+                <span style="color: white; font-size: 0.8rem;">Analysis: Short, cold texts ("I'm fine", "Do whatever") combined with low sleep indicates high hidden frustration.</span><br>
+                <span style="color: #00ff00; font-size: 0.8rem;">Suggested Action: TRIGGER_SWIGGY_CHOCOLATE</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">18. The Oracle & Ghost Protocol</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-red);">Predictive Burnout Prevention</h3>
+        <p>The "Oracle" looks into the future by analyzing your past 5 days of HRV. If it predicts severe impending burnout (HRV crashing 25% below baseline for multiple days), it triggers the "Ghost Protocol"—auto-drafting sick leave emails and blocking your calendar so you can disappear and recover.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">5-Day HRV Trend Analysis:</div>
+            <div style="font-family: monospace; color: white; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; letter-spacing: 2px;">
+                [60ms] - [62ms] - [59ms] - [61ms] - <span style="color: #00ff00;">[65ms]</span>
+            </div>
+            <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">ORACLE PREDICTION:</span><br>
+                <span style="color: #00ff00; font-size: 1rem;">STATUS STABLE</span><br>
+                <span style="color: var(--text-muted); font-size: 0.8rem;">Ghost Protocol is dormant.</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">19. Social Diplomat (The Socializer)</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">Automated VIP Networking</h3>
+        <p>ATLAS tracks how long it has been since you contacted close friends (7 days) and normal friends (14 days). When neglected, it auto-drafts casual, context-aware texts and pushes them to your iQOO phone for 1-tap WhatsApp sending.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">VIP Relationship Status: <span style="color: var(--accent-gold);">[Database Offline - Awaiting Initial Config]</span></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Pending Drafts</div>
+                    <div style="font-size: 1.2rem; color: white;">0</div>
+                </div>
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Neglected Flags</div>
+                    <div style="font-size: 1.2rem; color: #00ff00;">0</div>
+                </div>
+            </div>
+            <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px; text-align: center;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;"><i>ATLAS will prompt you on Discord post-launch to add names.</i></span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">24. Context-Aware Microphones (Spatial Resolution)</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-red);">Omnipresent Hotword Detection</h3>
+        <p>ATLAS listens for "Hey ATLAS" across all devices simultaneously via MacroDroid Hotword plugins. When triggered, the Hive Mind applies spatial conflict resolution to determine which device should respond to avoid talking over itself.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Current Audio Routing Priority:</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Mac Room Mic</div>
+                    <div style="font-size: 1rem; color: #00ff00;">[PRIORITY 1 - HOME]</div>
+                </div>
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">iQOO Phone</div>
+                    <div style="font-size: 1rem; color: var(--accent-gold);">[PRIORITY 2 - AWAY]</div>
+                </div>
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Samsung Phone</div>
+                    <div style="font-size: 1rem; color: var(--text-muted);">[PRIORITY 3 - AWAY]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">25. Guest Mode (Voice Identity Verification)</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-gold);">Vocal Security Checkpoint</h3>
+        <p>The ECAPA-TDNN neural network instantly analyzes all incoming audio. If it matches your voice baseline (Mukul), full admin access is granted. If an unrecognized guest tries to speak to ATLAS, it enters a strict "Guest Mode" denying access to your database and financials.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Current Authentication State:</div>
+            <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center; margin-bottom: 10px;">
+                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Session Status (5-Min Cache)</div>
+                <div style="font-size: 1.2rem; color: var(--accent-gold); letter-spacing: 2px;">[AWAITING VOICE INPUT]</div>
+            </div>
+            <div style="border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">GUEST MODE PROTOCOL:</span><br>
+                <span style="color: var(--accent-red); font-size: 0.9rem;">🚫 Database Read/Write: LOCKED</span><br>
+                <span style="color: var(--accent-red); font-size: 0.9rem;">🚫 Financial Commands: LOCKED</span><br>
+                <span style="color: #00ff00; font-size: 0.9rem;">✅ General Queries: ALLOWED</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">26. GPS Smart Alarms & Constant GPS</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">Location-Aware Wakeup</h3>
+        <p>Before ATLAS blasts the unkillable morning alarm on your Mac, it verifies your live GPS coordinates via your iQOO phone. If you are sleeping away from home, it mutes the Mac and sends a remote signal to trigger your standard Android phone alarm instead.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Pre-Alarm Validation Check:</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Current Location</div>
+                    <div style="font-size: 1rem; color: #00ff00;">[HOME]</div>
+                </div>
+                <div style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Alarm Routing</div>
+                    <div style="font-size: 1rem; color: var(--accent-gold);">[MAC SPEAKERS]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">27. Biometric Wake-Lock</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-red);">Forced-Action Alarm Termination</h3>
+        <p>You cannot kill the morning alarm from bed using a simple voice command. To terminate the unkillable Spotify sequence, you must physically step in front of the Mac's camera and allow ATLAS to verify your facial geometry.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Current Alarm State:</div>
+            <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center; margin-bottom: 10px;">
+                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Wake-Lock Status</div>
+                <div style="font-size: 1.2rem; color: #00ff00; letter-spacing: 2px;">[DORMANT - AWAITING TRIGGER]</div>
+            </div>
+            <div style="border-top: 1px dashed var(--border-color); padding-top: 10px; text-align: center;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">To kill active alarm, say: </span><br>
+                <span style="color: white; font-weight: bold; font-family: 'JetBrains Mono', monospace;">"ATLAS, I am awake."</span><br>
+                <span style="color: var(--text-muted); font-size: 0.8rem;">(Then step in front of the camera lens)</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">28. AI Call Scanner (Truecaller Sentinel)</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">The Digital Bouncer</h3>
+        <p>MacroDroid intercepts all incoming calls and scrapes the Truecaller ID. Spammers are instantly rejected. Delivery drivers are allowed to ring. If you miss an unknown call, ATLAS auto-texts them asking for their business and routes their SMS reply directly to your Discord.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Truecaller Routing Logic:</div>
+            
+            <div style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+                <span style="color: var(--accent-red);">🚨 "Spam / Sales / Telemarketer"</span>
+                <span style="color: var(--text-muted);">-> AUTO-REJECT</span>
+            </div>
+            <div style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+                <span style="color: #00ff00;">🍔 "Swiggy / Amazon / Zepto"</span>
+                <span style="color: var(--text-muted);">-> ALLOW RING</span>
+            </div>
+            <div style="padding: 10px; display: flex; justify-content: space-between;">
+                <span style="color: var(--accent-gold);">❓ Unknown (Missed Call)</span>
+                <span style="color: var(--text-muted);">-> AUTO-SMS + DISCORD SCRAPE</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">30. Biomechanical Sentinel</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-red);">Pavlovian Conditioning Engine</h3>
+        <p>Using Google's MediaPipe, ATLAS tracks 33 skeletal joints in real-time using zero API calls. If you slouch, bite your finger skin, or crack your knuckles, the system emits a sharp, annoying beep to subconsciously break your bad habits.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Live Kinematic Trackers:</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Spinal Alignment (Slouching)</span>
+                    <span style="color: #00ff00;">[OPTIMAL]</span>
+                </div>
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Fingertip-to-Mouth (Skin Biting)</span>
+                    <span style="color: #00ff00;">[CLEAR]</span>
+                </div>
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Interlocked Wrists (Knuckle Cracking)</span>
+                    <span style="color: #00ff00;">[CLEAR]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">6. Chronos Time-Manager Engine</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-gold);">Dynamic Timetable & Alert System</h3>
+        <p>ATLAS actively monitors your 24-hour schedule. High-priority events trigger aggressive audio and Discord pings. You can modify the schedule via voice using strict function-calling without hallucination risks.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 10px; color: var(--text-muted);">Active Timetable (JSON DB):</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 10px;">
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border-left: 3px solid #00ff00; border-radius: 4px;">
+                    <span style="color: var(--text-muted); font-family: monospace;">08:15</span> 
+                    <span style="margin-left: 10px; color: white;">DEEP WORK BLOCK 1</span>
+                    <span style="float: right; color: #ff4444; font-size: 0.8rem;">[HIGH PRIORITY]</span>
+                </div>
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border-left: 3px solid #ffcc00; border-radius: 4px;">
+                    <span style="color: var(--text-muted); font-family: monospace;">10:45</span> 
+                    <span style="margin-left: 10px; color: white;">BREAK (Hydrate/Snack)</span>
+                    <span style="float: right; color: #888; font-size: 0.8rem;">[LOW PRIORITY]</span>
+                </div>
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border-left: 3px solid #00ff00; border-radius: 4px;">
+                    <span style="color: var(--text-muted); font-family: monospace;">11:00</span> 
+                    <span style="margin-left: 10px; color: white;">DEEP WORK BLOCK 2</span>
+                    <span style="float: right; color: #ff4444; font-size: 0.8rem;">[HIGH PRIORITY]</span>
+                </div>
+            </div>
+            <div style="margin-top: 10px; text-align: center; color: var(--text-muted); font-size: 0.8rem; font-style: italic;">
+                "ATLAS, shift my training to 17:30 today." -> Executes database JSON update.
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">31. Deep Work / Focus Mode Auto-Trigger</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-blue);">Kinematic Flow State Engine</h3>
+        <p>ATLAS tracks the microscopic stability of your head and the ambient noise levels in the room. If your head remains centered and locked (e.g. staring at code or a book) in a silent room for 5 continuous minutes, ATLAS engages the Lockdown Protocol.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 10px; color: var(--text-muted);">Current Flow State:</div>
+            <div style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+                <div style="font-size: 1.5rem; color: #00ff00; letter-spacing: 3px; font-weight: bold;">[ ENGAGED ]</div>
+                <div style="margin-top: 10px; color: var(--text-muted); font-size: 0.8rem; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Target:</span> <span style="color: white;">Phone DND</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Target:</span> <span style="color: white;">Discord Pager (Silenced)</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 10px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+                Lockdown will reverse automatically if erratic head movement or gaming comms are detected.
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">32. Deep Web Crawler (Intelligence Brief)</h2>
+    <div class="card" style="margin-bottom: 30px; max-width: 600px;">
+        <h3 style="color: var(--accent-gold);">Automated Research Assistant</h3>
+        <p>ATLAS scrapes the top posts from tech subreddits (e.g. r/MachineLearning) every morning. It bypasses JS blockers using old.reddit and delivers a curated Intelligence Brief directly to your Discord. You get the knowledge without falling into the scrolling trap.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">Data Sources:</div>
+            <span style="display: inline-block; padding: 5px 10px; background: rgba(255,165,0,0.2); border: 1px solid orange; border-radius: 4px; font-size: 0.8rem; margin-right: 5px;">r/LocalLLaMA</span>
+            <span style="display: inline-block; padding: 5px 10px; background: rgba(255,165,0,0.2); border: 1px solid orange; border-radius: 4px; font-size: 0.8rem; margin-right: 5px;">r/MachineLearning</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">34. Windows Digital Bouncer</h2>
+    <div class="card" style="margin-bottom: 80px; max-width: 600px;">
+        <h3 style="color: var(--accent-red);">The Distraction Jammer</h3>
+        <p>A standalone script runs on your primary Windows laptop with Administrator privileges. When the Mac's Biomechanical Sentinel detects Deep Work and flips the Firebase flag, the Windows Bouncer instantly edits your `hosts` file to blackhole distracting websites.</p>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <div style="font-size: 0.9rem; margin-bottom: 10px; color: var(--text-muted);">DNS Routing Status:</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">youtube.com</span>
+                    <span style="color: #00ff00;">ALLOWED</span>
+                </div>
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">reddit.com</span>
+                    <span style="color: #00ff00;">ALLOWED</span>
+                </div>
+                <div style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); border-radius: 8px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">instagram.com</span>
+                    <span style="color: #00ff00;">ALLOWED</span>
+                </div>
+            </div>
+            <div style="margin-top: 10px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+                When Flow State triggers, these domains reroute to 127.0.0.1
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let shcState = {
+            goal: '',
+            totalHours: 0,
+            deadlineDays: 0,
+            hoursCompleted: 0,
+            daysElapsed: 0,
+            maxHoursPerDay: 12.0
+        };
+
+        document.getElementById('btnInitCalendar').addEventListener('click', () => {
+            shcState.goal = document.getElementById('shcGoal').value || 'Unspecified Goal';
+            shcState.totalHours = parseFloat(document.getElementById('shcHours').value) || 0;
+            shcState.deadlineDays = parseInt(document.getElementById('shcDays').value) || 0;
+            shcState.hoursCompleted = 0;
+            shcState.daysElapsed = 0;
+            
+            document.getElementById('shcOutput').innerText = `[INITIALIZED] ${shcState.goal}\nRequires: ${shcState.totalHours} hrs across ${shcState.deadlineDays} days.\nDaily Target: ${(shcState.totalHours / shcState.deadlineDays).toFixed(1)} hrs/day.`;
+            document.getElementById('shcOutput').style.color = '#00ff00';
+        });
+
+        document.getElementById('btnLogProgress').addEventListener('click', () => {
+            const logged = parseFloat(document.getElementById('shcLogHours').value) || 0;
+            shcState.hoursCompleted += logged;
+            shcState.daysElapsed += 1;
+            
+            let daysRemaining = shcState.deadlineDays - shcState.daysElapsed;
+            let hoursRemaining = shcState.totalHours - shcState.hoursCompleted;
+            
+            let out = `--- DAY ${shcState.daysElapsed} LOGGED: ${logged} hrs ---\n`;
+            out += `Progress: ${shcState.hoursCompleted} / ${shcState.totalHours} hrs\n`;
+            
+            if (daysRemaining <= 0) {
+                if (hoursRemaining > 0) {
+                    out += `\n[!] DEADLINE REACHED. Missed by ${hoursRemaining} hrs.`;
+                    document.getElementById('shcOutput').style.color = 'var(--accent-red)';
+                } else {
+                    out += `\n[SUCCESS] Goal completed!`;
+                    document.getElementById('shcOutput').style.color = '#00ff00';
+                }
+            } else {
+                let requiredDaily = hoursRemaining / daysRemaining;
+                if (requiredDaily > shcState.maxHoursPerDay) {
+                    let extraDays = Math.ceil((hoursRemaining / shcState.maxHoursPerDay) - daysRemaining);
+                    shcState.deadlineDays += extraDays;
+                    let newDaily = hoursRemaining / (daysRemaining + extraDays);
+                    out += `\n[WARNING] Schedule mathematically impossible (>12h/day)!\n`;
+                    out += `[*] AUTO-HEALING: Extending deadline by ${extraDays} days.\n`;
+                    out += `[*] NEW SCHEDULE: ${newDaily.toFixed(1)} hrs/day for the next ${daysRemaining + extraDays} days.`;
+                    document.getElementById('shcOutput').style.color = 'var(--accent-gold)';
+                } else {
+                    out += `\n[OK] New Requirement: ${requiredDaily.toFixed(1)} hrs/day.`;
+                    document.getElementById('shcOutput').style.color = '#00ff00';
+                }
+            }
+            
+            document.getElementById('shcOutput').innerText = out;
+            document.getElementById('shcLogHours').value = '';
+        });
+
+        // Debate Engine Simulation
+        document.getElementById('btnStartDebate').addEventListener('click', async () => {
+            const input = document.getElementById('debateInput').value;
+            const outputBox = document.getElementById('debateOutput');
+            const btn = document.getElementById('btnStartDebate');
+            
+            if (!input) return;
+            
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            outputBox.style.color = "var(--text-muted)";
+            
+            outputBox.innerText = `[ATLAS] Task received. Evaluating complexity...\n`;
+            await new Promise(r => setTimeout(r, 1000));
+            
+            outputBox.innerText += `[ATLAS] Task is complex. Briefing the Swarm...\n`;
+            await new Promise(r => setTimeout(r, 1500));
+            
+            outputBox.innerText += `[SWARM] Generating Draft V1...\n`;
+            await new Promise(r => setTimeout(r, 2000));
+            
+            outputBox.innerText += `[ATLAS] Draft V1 received. Initiating Ruthless Critique Protocol.\n`;
+            outputBox.style.color = "var(--accent-gold)";
+            await new Promise(r => setTimeout(r, 1500));
+            
+            outputBox.innerText += `[ATLAS CRITIQUE] This is weak. The IT transition plan lacks a financial timeline. Rewrite it and prioritize the 12Cr per annum end-goal.\n`;
+            await new Promise(r => setTimeout(r, 2000));
+            
+            outputBox.innerText += `[SWARM] Refining Draft V2 based on critique...\n`;
+            await new Promise(r => setTimeout(r, 2000));
+            
+            outputBox.style.color = "var(--accent-blue)";
+            outputBox.innerText += `\n[ATLAS] Draft V2 Approved. Final Output ready.\n`;
+            
+            btn.innerText = "Initiate Debate Protocol";
+            btn.disabled = false;
+        });
+
+        // Phantom Coder Simulation
+        document.getElementById('btnSimulatePhantom').addEventListener('click', async () => {
+            const out = document.getElementById('phantomOutput');
+            out.innerHTML += `\n<span style="color: white;">[PHANTOM] Detected save on: ATLAS_Masterplan.html. Scanning for bugs...</span>`;
+            out.scrollTop = out.scrollHeight;
+            
+            await new Promise(r => setTimeout(r, 1500));
+            
+            out.innerHTML += `\n<span style="color: var(--accent-red); font-weight: bold;">🚨 [WARNING] 🚨\nLine 567: You forgot to close the div tag before the script block. This will break the flexbox layout on mobile.</span>`;
+            out.scrollTop = out.scrollHeight;
+        });
+
+        // Procurement Engine Simulation
+        document.getElementById('btnStartProcurement').addEventListener('click', async () => {
+            const input = document.getElementById('procureInput').value;
+            const outputBox = document.getElementById('procureOutput');
+            const btn = document.getElementById('btnStartProcurement');
+            
+            if (!input) return;
+            
+            btn.innerText = "Connecting to Samsung...";
+            btn.disabled = true;
+            outputBox.style.color = "var(--text-muted)";
+            
+            outputBox.innerText = `[ATLAS] Sending webhook to Samsung MacroDroid...\n`;
+            await new Promise(r => setTimeout(r, 1000));
+            
+            outputBox.innerText += `[SAMSUNG] Opening Zepto. Scraping prices for "${input}"...\n`;
+            await new Promise(r => setTimeout(r, 1500));
+            outputBox.innerText += `  ↳ Zepto Total: ₹195 (includes ₹30 delivery)\n\n`;
+            
+            outputBox.innerText += `[SAMSUNG] Opening Blinkit. Scraping prices...\n`;
+            await new Promise(r => setTimeout(r, 1500));
+            outputBox.innerText += `  ↳ Blinkit Total: ₹182 (Free delivery applied)\n\n`;
+            
+            outputBox.innerText += `[SAMSUNG] Opening Amazon Now. Scraping prices...\n`;
+            await new Promise(r => setTimeout(r, 1500));
+            outputBox.innerText += `  ↳ Amazon Total: ₹210\n\n`;
+            
+            outputBox.style.color = "var(--accent-gold)";
+            outputBox.innerText += `[ATLAS] Blinkit is cheapest. Instructing Samsung to build cart...\n`;
+            await new Promise(r => setTimeout(r, 2000));
+            
+            outputBox.style.color = "#00ff00";
+            outputBox.innerText += `[SUCCESS] Cart built on Blinkit. Discord ping sent to Primary Phone for UPI Checkout.`;
+            
+            btn.innerText = "Find Cheapest";
+            btn.disabled = false;
+        });
+    </script>
+
+    <!-- ATLAS LIVE CONTROLS -->
+    <div style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--surface); padding: 15px 30px; border-radius: 50px; border: 1px solid var(--border-color); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; gap: 20px; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 1000;">
+        <button id="btnStartScribe" style="background: var(--accent-red); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif;">🎙️ Start Scribe</button>
+        <button id="btnStopScribe" style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif; display: none;">⏹️ Stop & Process</button>
+        <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.2);"></div>
+        <a href="discord://app" target="_blank" style="background: #5865F2; color: white; text-decoration: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; transition: 0.3s; font-family: 'Inter', sans-serif;">👾 Open Discord</a>
+        <span id="scribeStatus" style="color: var(--text-muted); font-size: 0.9rem; margin-left: 10px;">Ready</span>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById('btnStartScribe').addEventListener('click', async () => {
+            try {
+                // Request System Audio (Tab Audio)
+                const stream = await navigator.mediaDevices.getDisplayMedia({ 
+                    audio: true,
+                    video: true // Web standard requires video for getDisplayMedia, user can ignore video
+                });
+                
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    document.getElementById('scribeStatus').innerText = "Processing...";
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    audioChunks = []; // reset
+                    
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'lecture.webm');
+
+                    try {
+                        const response = await fetch('http://127.0.0.1:5000/upload-audio', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            document.getElementById('scribeStatus').innerText = "Notes sent to Discord!";
+                        } else {
+                            document.getElementById('scribeStatus').innerText = "Error processing audio.";
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        document.getElementById('scribeStatus').innerText = "Server unreachable. Run scribe_server.py!";
+                    }
+                    
+                    // Stop all tracks to remove the screen sharing indicator
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                document.getElementById('btnStartScribe').style.display = 'none';
+                document.getElementById('btnStopScribe').style.display = 'block';
+                document.getElementById('scribeStatus').innerText = "Recording...";
+                document.getElementById('scribeStatus').style.color = "var(--accent-red)";
+                
+            } catch (err) {
+                console.error("Error capturing audio: ", err);
+                alert("Permission denied or error capturing audio. Try sharing a specific Chrome Tab with audio checked.");
+            }
+        });
+
+        document.getElementById('btnStopScribe').addEventListener('click', () => {
+            mediaRecorder.stop();
+            document.getElementById('btnStartScribe').style.display = 'block';
+            document.getElementById('btnStopScribe').style.display = 'none';
+            document.getElementById('scribeStatus').style.color = "var(--text-muted)";
+        });
+    </script>
+</body>
+</html>

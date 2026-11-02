@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mukul A - Resume</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg-color: #0f172a;
+            --surface: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --accent: #38bdf8;
+        }
+
+        .light-mode {
+            --primary: #2563eb;
+            --bg-color: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --accent: #0ea5e9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        button {
+            background-color: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--surface);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .contact-info a {
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2.2fr;
+            gap: 30px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .section-block {
+            margin-bottom: 25px;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            margin-bottom: 3px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        p, ul {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        ul {
+            padding-left: 18px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .skill-group {
+            margin-bottom: 15px;
+        }
+
+        .skill-group h4 {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            margin-bottom: 3px;
+        }
+        
+        .skill-group p {
+            font-size: 0.85rem;
+        }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+                font-size: 10px;
+                line-height: 1.3;
+            }
+            .light-mode, :root {
+                --bg-color: white;
+                --surface: white;
+                --text-main: black;
+                --text-muted: #222;
+                --border: #ccc;
+                --primary: #000;
+                --accent: #222;
+            }
+            .controls { display: none; }
+            .container {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                max-width: 100%;
+            }
+            @page { margin: 0.6cm; }
+            header {
+                padding-bottom: 5px;
+                margin-bottom: 10px;
+            }
+            h1 { font-size: 1.6rem; margin-bottom: 2px; color: #000; }
+            .contact-info { gap: 10px; font-size: 0.85rem; }
+            h2 { font-size: 1.1rem; border-bottom: 1px solid #000; color: #000; margin-bottom: 6px; padding-bottom: 2px;}
+            h3 { font-size: 1rem; margin-bottom: 1px; }
+            .subtitle { font-size: 0.85rem; margin-bottom: 3px;}
+            p, ul, .skill-group p { font-size: 0.85rem; color: #111; }
+            .section-block { margin-bottom: 10px !important; }
+            .skill-group { margin-bottom: 8px; }
+            .main-content { gap: 15px; }
+            ul { padding-left: 14px; }
+            li { margin-bottom: 1px; }
+            
+            /* Prevent breaking inside projects */
+            .section-block {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <div class="controls">
+        <button onclick="document.body.classList.toggle('light-mode')">Toggle Dark/Light Mode</button>
+        <button onclick="window.print()">Save as PDF</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Mukul A</h1>
+            <div class="contact-info">
+                <span><i class="fas fa-map-marker-alt"></i> Bengaluru, Karnataka</span>
+                <span><i class="fas fa-phone"></i> 7760352739</span>
+                <span><i class="fas fa-envelope"></i> mukula25504@gmail.com</span>
+                <span><i class="fab fa-linkedin"></i> linkedin.com/in/mukul-a-815248302</span>
+                <span><i class="fab fa-github"></i> github.com/Mukula2704</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- LEFT COLUMN -->
+            <div class="column-left">
+                <div class="section-block">
+                    <h2>Education</h2>
+                    <h3>B.Tech in Computer Science</h3>
+                    <div class="subtitle">Alliance University (AI & ML) <br> 2022 – 2026 | CGPA: 7.46</div>
+                    
+                    <h3 style="margin-top: 15px;">12th PU (PCMC)</h3>
+                    <div class="subtitle">Gopalan Pre-University College <br> Score: 75%</div>
+                </div>
+
+                <div class="section-block">
+                    <h2>Technical Skills</h2>
+                    <div class="skill-group">
+                        <h4>Languages</h4>
+                        <p>Python, Dart (Flutter), SQL, Go</p>
+                    </div>
+                    <div class="skill-group">
+                        <h4>Frameworks</h4>
+                        <p>Flutter, React.js, Express.js, Flask, Node.js</p>
+                    </div>
+                    <div class="skill-group">
+                        <h4>Tools & Cloud</h4>
+                        <p>Git, Docker, Firebase, Hyperledger Fabric</p>
+                    </div>
+                    <div class="skill-group">
+                        <h4>Hardware & IoT</h4>
+                        <p>Sensors (Soil Moisture, Spatial Eye), Microcontrollers</p>
+                    </div>
+                    <div class="skill-group">
+                        <h4>AI/ML</h4>
+                        <p>DistilBERT, BART-MNLI</p>
+                    </div>
+                </div>
+
+                <div class="section-block">
+                    <h2>Certifications</h2>
+                    <ul style="padding-left: 12px; font-size: 0.85rem;">
+                        <li><strong>Oracle:</strong> Cloud Infrastructure 2025 Generative AI Professional</li>
+                        <li><strong>DeepLearning.AI:</strong> Improving Deep Neural Networks</li>
+                        <li><strong>IBM:</strong> Build Decision Trees, SVMs, and Artificial Neural Networks</li>
+                        <li><strong>UC San Diego:</strong> Data Structures</li>
+                        <li><strong>Univ of Glasgow:</strong> Evolutionary Computation & its Applications</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="column-right">
+                <div class="section-block">
+                    <h2>Summary</h2>
+                    <p>Software Engineer specializing in Artificial Intelligence, Blockchain infrastructure, and Full-Stack Development. Adept at architecting decentralized platforms and bridging IoT hardware with intelligent digital interfaces. Proven ability to independently drive complex technical projects from conceptualization through to deployment, delivering high-performance, secure, and scalable solutions.</p>
+                </div>
+
+                <div class="section-block">
+                    <h2>Projects</h2>
+                    
+                    <div class="section-block">
+                        <h3>Secure Voting System using Blockchain</h3>
+                        <div class="subtitle">Hyperledger Fabric, Node.js, React.js, Cryptography</div>
+                        <ul>
+                            <li>Developed a consortium-based e-voting platform preventing electoral fraud via distributed ledger technology.</li>
+                            <li>Integrated <strong>DigiLocker OAuth 2.0</strong> for secure identity verification and <strong>Blind Signatures</strong> for ballot anonymity.</li>
+                            <li>Implemented <strong>Threshold Chameleon Hashing</strong> for legally authorized, tamper-evident vote corrections.</li>
+                            <li><strong>Outcomes:</strong> Handled 40,000 transactions at ~200 TPS with zero failures. Published and presented at ICAMC-2026.</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <h3>Atlas Ecosystem: Advanced AI Command Center</h3>
+                        <div class="subtitle">Python, IoT Hardware, AI Chatbot</div>
+                        <ul>
+                            <li><strong>Dashboard:</strong> Built a centralized metrics dashboard featuring an integrated AI chatbot for intuitive ecosystem control.</li>
+                            <li><strong>Hardware Integrations:</strong> Synchronized physical hardware (servers, Spatial Eye modules) with digital monitoring interfaces.</li>
+                            <li><strong>Advanced Features:</strong> Developed predictive automations that analyze hardware sensor inputs to trigger intelligent actions.</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <h3>Email Summariser</h3>
+                        <div class="subtitle">Python, Flask, DistilBERT, BART-MNLI</div>
+                        <ul>
+                            <li>Built and deployed a Flask web application utilizing NLP models to summarize lengthy email threads and automatically classify message intents for efficient inbox management.</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <h3>Sensor-based Plant Health Detection System</h3>
+                        <div class="subtitle">IoT Sensors, Microcontrollers</div>
+                        <ul>
+                            <li>Designed a smart soil moisture detection system that alerts users for targeted watering, demonstrating the potential to reduce agricultural water wastage by up to 70%.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

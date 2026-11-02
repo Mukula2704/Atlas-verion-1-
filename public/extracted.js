@@ -833,3 +833,78 @@ function spawnRipple(x, y) {
 }
 
 init();
+
+// ==========================================
+// AI NEURAL LINK SYSTEM
+// ==========================================
+
+const aiTerminal = document.getElementById("aiTerminalStream");
+const visionFeed = document.getElementById("aiVisionFeed");
+const aiNodes = {
+  server: document.getElementById("node-server"),
+  vision: document.getElementById("node-vision")
+};
+
+function addAILog(source, message) {
+  if (!aiTerminal) return;
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  
+  const entry = document.createElement("div");
+  entry.className = "ai-log-entry";
+  entry.innerHTML = `
+    <span class="ai-log-time">[${timeStr}]</span>
+    <span class="ai-log-source ${source.toUpperCase()}">${source.toUpperCase()}:</span>
+    ${message}
+  `;
+  
+  aiTerminal.appendChild(entry);
+  aiTerminal.scrollTop = aiTerminal.scrollHeight;
+}
+
+// Temporary Simulation of AI Node Activity (until Firebase is connected)
+setTimeout(() => {
+  addAILog("SYSTEM", "Handshake complete. Neural Link established.");
+  if (aiNodes.server) aiNodes.server.classList.add("online");
+}, 1500);
+
+setTimeout(() => {
+  addAILog("VISION", "OpenCV module initialized. Requesting spatial geometry...");
+  if (aiNodes.vision) aiNodes.vision.classList.add("online");
+}, 3000);
+
+setTimeout(() => {
+  addAILog("SWARM", "Retrieving historical context vectors. Awaiting tasks.");
+}, 4500);
+
+// ==========================================
+// AI PROJECT MASTERCLASS
+// ==========================================
+function openMasterclass() {
+  const modal = document.getElementById('masterclassModal');
+  const container = document.getElementById('masterclassContent');
+  if (!modal || !container) return;
+  
+  if (typeof AI_MASTERCLASS === 'undefined') {
+    container.innerHTML = '<div style="color:var(--rose);">Error: masterclass.js not loaded. Refresh the page.</div>';
+    modal.style.display = 'flex';
+    return;
+  }
+
+  let html = `<div style="color:var(--muted); font-size:12px; margin-bottom:10px;">Study this curriculum to understand the AI backend architecture.</div>`;
+  
+  AI_MASTERCLASS.forEach(lesson => {
+    html += `
+      <div style="background:rgba(0,0,0,0.5); padding:1rem; border-radius:10px; border:1px solid var(--border);">
+        <div style="font-size:12px; color:var(--rose); margin-bottom:5px;">LESSON ${lesson.day} | ${lesson.topic}</div>
+        <div style="font-size:18px; color:var(--cream); font-weight:600; margin-bottom:8px;">${lesson.title}</div>
+        <div style="font-size:14px; color:var(--text); line-height:1.5; margin-bottom:15px;">${lesson.detail}</div>
+        <div style="background:#0a0808; padding:10px; border-radius:6px; border:1px solid var(--border2); font-family:var(--mono); font-size:12px; color:#a9dc76; overflow-x:auto; white-space:pre-wrap;">${lesson.codeSnippet}</div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  modal.style.display = 'flex';
+}
+

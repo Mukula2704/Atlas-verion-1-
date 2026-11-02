@@ -1,0 +1,38 @@
+# Project ATLAS v1.0 - Core AI Backend Dependencies
+
+# Google Gemini & GenAI SDK
+google-genai>=0.1.1
+google-generativeai>=0.8.0
+
+# Firebase Realtime & Admin SDK
+firebase-admin>=6.5.0
+
+# Computer Vision & Kinematics
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Audio Processing & Speaker Verification
+torch>=2.0.0
+torchaudio>=2.0.0
+speechbrain>=1.0.0
+sounddevice>=0.4.6
+scipy>=1.10.0
+
+# FastAPI & Network Services
+fastapi>=0.100.0
+uvicorn>=0.23.0
+requests>=2.31.0
+websockets>=12.0
+
+# Memory, Vector Stores & Embeddings
+chromadb>=0.4.0
+
+# Music & Biorhythm Integration
+spotipy>=2.23.0
+
+# System, Environment & Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+paramiko>=3.3.0
